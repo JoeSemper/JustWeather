@@ -41,6 +41,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/settings" />
 
+    <EditText
+        android:id="@+id/edit_location"
+        android:layout_width="243dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:padding="5dp"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/location_text"
+        app:layout_constraintTop_toTopOf="@+id/location_text" />
+
     <ImageButton
         android:id="@+id/back"
         android:layout_width="48dp"
@@ -57,7 +69,6 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:checked="true"
         android:text="@string/wind_speed"
         app:layout_constraintStart_toStartOf="@+id/location_text"
         app:layout_constraintTop_toBottomOf="@+id/location_text"
@@ -68,18 +79,10 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:checked="true"
         android:text="@string/pressure"
         app:layout_constraintStart_toStartOf="@+id/wind_check"
         app:layout_constraintTop_toBottomOf="@+id/wind_check"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
-    <SearchView
-        android:id="@+id/search"
-        android:layout_width="249dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintStart_toEndOf="@+id/location_text"
-        app:layout_constraintTop_toTopOf="@+id/location_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

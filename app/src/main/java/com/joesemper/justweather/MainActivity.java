@@ -1,5 +1,6 @@
 package com.joesemper.justweather;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,12 +9,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
 
@@ -34,18 +37,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        String instanceState;
 
-        ImageView windIcon = findViewById(R.id.wind_icon);
-        TextView wind = findViewById(R.id.wind_check);
-        TextView pressure = findViewById(R.id.pressure_check);
-
-
-        String  instanceState;
-
-        if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             instanceState = "Первый запуск!";
-        }
-        else{
+        } else {
             instanceState = "Повторный запуск!";
         }
         Toast.makeText(getApplicationContext(), instanceState + " - onCreate()", Toast.LENGTH_SHORT).show();
@@ -53,89 +49,83 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Toast.makeText(getApplicationContext(), "onStart()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onStart()");
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode != REQUEST_CODE) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        if (resultCode == OK) {
+            Parcel parcel = null;
+            if (data != null) {
+                parcel = (Parcel) Objects.requireNonNull(data.getExtras()).getSerializable(SETTINGS);
+            }
+
+            ImageView windIcon = findViewById(R.id.wind_icon);
+            TextView wind = findViewById(R.id.wind_text);
+            TextView pressure = findViewById(R.id.pressure_text);
+            TextView location = findViewById(R.id.location);
+
+            if (parcel == null){
+                return;
+            }
+            if (!parcel.isWindOn) {
+                windIcon.setVisibility(View.GONE);
+                wind.setVisibility(View.GONE);
+            } else {
+                windIcon.setVisibility(View.VISIBLE);
+                wind.setVisibility(View.VISIBLE);
+            }
+
+            if (!parcel.isPressureOn) {
+                pressure.setVisibility(View.GONE);
+            } else {
+                pressure.setVisibility(View.VISIBLE);
+            }
+
+            location.setText(parcel.location);
+
+        }
+
+
     }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle saveInstanceState){
-        super.onRestoreInstanceState(saveInstanceState);
-        Toast.makeText(getApplicationContext(), "Повторный запуск!! - onRestoreInstanceState()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "Повторный запуск!! - onRestoreInstanceState()");
-
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Toast.makeText(getApplicationContext(), "onResume()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onResume()");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Toast.makeText(getApplicationContext(), "onPause()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onPause()");
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle saveInstanceState){
-        super.onSaveInstanceState(saveInstanceState);
-        Toast.makeText(getApplicationContext(), "onSaveInstanceState()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onSaveInstanceState()");
-    }
-
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Toast.makeText(getApplicationContext(), "onStop()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onStop()");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Toast.makeText(getApplicationContext(), "onRestart()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onRestart()");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Toast.makeText(getApplicationContext(), "onDestroy()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onDestroy()");
-    }
-
-
-
 
     private void onSettingsClicked() {
-        startActivity(new Intent(this, SettingsActivity.class));
+        TextView wind = findViewById(R.id.wind_text);
+        TextView pressure = findViewById(R.id.pressure_text);
+        TextView location = findViewById(R.id.location);
+        Parcel parcel = new Parcel();
+
+        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
+        parcel.isWindOn = wind.getVisibility() == View.VISIBLE;
+        parcel.location = (String) location.getText();
+
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(SETTINGS, parcel);
+        startActivityForResult(intent, REQUEST_CODE);
+
+
+//        startActivity(new Intent(this, SettingsActivity.class));
     }
 
-    private String getDate(){
+    private String getDate() {
         StringBuilder sb = new StringBuilder();
         String[] date = this.date.toString().split(" ", 4);
-        for (int i = 0; i <3; i++) {
-            sb.append(date[i]+" ");
-        }
-        return sb.toString();
-    }
-    private String getDate(Date d){
-        StringBuilder sb = new StringBuilder();
-        String[] date = d.toString().split(" ", 4);
-        for (int i = 0; i <3; i++) {
-            sb.append(date[i]+" ");
+        for (int i = 0; i < 3; i++) {
+            sb.append(date[i] + " ");
         }
         return sb.toString();
     }
 
-    private void setDate(){
+    private String getDate(Date d) {
+        StringBuilder sb = new StringBuilder();
+        String[] date = d.toString().split(" ", 4);
+        for (int i = 0; i < 3; i++) {
+            sb.append(date[i] + " ");
+        }
+        return sb.toString();
+    }
+
+    private void setDate() {
         long oneDay = 86400000;
 
         TextView currentDate = findViewById(R.id.current_date);
