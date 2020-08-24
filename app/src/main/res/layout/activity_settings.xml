@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/icons"
-    tools:context=".Settings">
+    tools:context=".SettingsActivity">
 
     <Button
         android:id="@+id/button"
@@ -53,10 +53,10 @@
         app:layout_constraintTop_toTopOf="@+id/settings" />
 
     <Switch
-        android:id="@+id/wind"
+        android:id="@+id/wind_check"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="28dp"
         android:checked="true"
         android:text="@string/wind_speed"
         app:layout_constraintStart_toStartOf="@+id/location_text"
@@ -64,14 +64,14 @@
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <Switch
-        android:id="@+id/pressure"
+        android:id="@+id/pressure_check"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:checked="true"
         android:text="@string/pressure"
-        app:layout_constraintStart_toStartOf="@+id/wind"
-        app:layout_constraintTop_toBottomOf="@+id/wind"
+        app:layout_constraintStart_toStartOf="@+id/wind_check"
+        app:layout_constraintTop_toBottomOf="@+id/wind_check"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <SearchView
