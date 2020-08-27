@@ -37,4 +37,7 @@
     <string name="apply_text">Apply</string>
     <string name="day_2">July 2</string>
     <string name="temp_2">+11  °C</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_location">Kaluga</string>
 </resources>
