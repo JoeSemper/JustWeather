@@ -184,17 +184,6 @@
         app:layout_constraintStart_toStartOf="@+id/temperature"
         app:layout_constraintTop_toBottomOf="@+id/temperature" />
 
-    <TextView
-        android:id="@+id/wind_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:padding="2dp"
-        android:text="@string/wind"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/wind_icon"
-        app:layout_constraintTop_toTopOf="@+id/wind_icon" />
-
     <ImageView
         android:id="@+id/wind_icon"
         android:layout_width="30dp"
@@ -204,17 +193,6 @@
         app:layout_constraintStart_toStartOf="@+id/temperature"
         app:layout_constraintTop_toBottomOf="@+id/additional"
         app:srcCompat="@drawable/wind_48px" />
-
-    <TextView
-        android:id="@+id/pressure_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:padding="2dp"
-        android:text="@string/pressure_text"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/wind_check"
-        app:layout_constraintTop_toTopOf="@+id/wind_check" />
 
     <TextView
         android:id="@+id/day_2_date"
@@ -235,5 +213,25 @@
         app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/day_2_date" />
+
+    <TextView
+        android:id="@+id/wind_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/wind"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/wind_icon"
+        app:layout_constraintTop_toTopOf="@+id/wind_icon" />
+
+    <TextView
+        android:id="@+id/pressure_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/pressure_text"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/wind_text"
+        app:layout_constraintTop_toTopOf="@+id/wind_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
