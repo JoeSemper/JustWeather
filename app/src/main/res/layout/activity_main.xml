@@ -10,11 +10,23 @@
     tools:context=".MainActivity">
 
     <ImageButton
-        android:id="@+id/settings_button"
+        android:id="@+id/main_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:tint="@color/common_google_signin_btn_text_dark_focused"
-        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        app:srcCompat="@drawable/icons8_left_24px" />
+
+    <ImageButton
+        android:id="@+id/settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:tint="@color/common_google_signin_btn_text_dark_focused"
+        app:srcCompat="@drawable/settings" />
 
 
 </FrameLayout>

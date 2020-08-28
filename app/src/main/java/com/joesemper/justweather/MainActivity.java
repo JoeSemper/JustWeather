@@ -6,6 +6,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,9 +26,9 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
-    SettingsFragment settingsFragment;
     MainFragment mainFragment;
-    String currentFragment;
+
+    static Bundle bundle = new Bundle();
 
 
     @Override
@@ -35,167 +36,74 @@ public class MainActivity extends AppCompatActivity implements Constants {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainFragment = new MainFragment();
+        mainFragment = MainFragment.newInstance("Kaluga", true, false);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.linear_parrent, mainFragment);
         fragmentTransaction.commit();
-        currentFragment = MAIN;
-
-        FrameLayout layout = findViewById(R.id.linear_parrent);
 
 
-
-        settingsFragment = new SettingsFragment();
         ImageButton settingsButton = findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new ListenerOnReplace(settingsFragment));
+        ImageButton mainButton = findViewById(R.id.main_button);
 
+        settingsButton.setOnClickListener(new SettingsListener());
+        mainButton.setOnClickListener(new MainListener());
 
-//        TextView temperature = findViewById(R.id.temperature);
-//        ImageButton settingsButton = findViewById(R.id.settings);
-//
-//        setDate();
-//
-//        settingsButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                onSettingsClicked();
-//            }
-//        });
-//
-//        String instanceState;
-//
-//        if (savedInstanceState == null) {
-//            instanceState = "Первый запуск!";
-//        } else {
-//            instanceState = "Повторный запуск!";
-//        }
-//        Toast.makeText(getApplicationContext(), instanceState + " - onCreate()", Toast.LENGTH_SHORT).show();
-//        Log.d("test", "onCreate()");
     }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        if (requestCode != REQUEST_CODE) {
-//            super.onActivityResult(requestCode, resultCode, data);
-//            return;
-//        }
-//        if (resultCode == OK) {
-//            Parcel parcel = null;
-//            if (data != null) {
-//                parcel = (Parcel) Objects.requireNonNull(data.getExtras()).getSerializable(SETTINGS);
-//            }
-//
-//            ImageView windIcon = findViewById(R.id.wind_icon);
-//            TextView wind = findViewById(R.id.wind_text);
-//            TextView pressure = findViewById(R.id.pressure_text);
-//            TextView location = findViewById(R.id.location);
-//
-//            if (parcel == null){
-//                return;
-//            }
-//            if (!parcel.isWindOn) {
-//                windIcon.setVisibility(View.GONE);
-//                wind.setVisibility(View.GONE);
-//            } else {
-//                windIcon.setVisibility(View.VISIBLE);
-//                wind.setVisibility(View.VISIBLE);
-//            }
-//
-//            if (!parcel.isPressureOn) {
-//                pressure.setVisibility(View.GONE);
-//            } else {
-//                pressure.setVisibility(View.VISIBLE);
-//            }
-//
-//            location.setText(parcel.location);
-//
-//        }
-//
-//
-//    }
 
-//    private void onSettingsClicked() {
-//        TextView wind = findViewById(R.id.wind_text);
-//        TextView pressure = findViewById(R.id.pressure_text);
-//        TextView location = findViewById(R.id.location);
-//        Parcel parcel = new Parcel();
-//
-//        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
-//        parcel.isWindOn = wind.getVisibility() == View.VISIBLE;
-//        parcel.location = (String) location.getText();
-//
-//        Intent intent = new Intent(this, SettingsActivity.class);
-//        intent.putExtra(SETTINGS, parcel);
-//        startActivityForResult(intent, REQUEST_CODE);
-//
-//
-////        startActivity(new Intent(this, SettingsActivity.class));
-//    }
-
-//    private String getDate() {
-//        StringBuilder sb = new StringBuilder();
-//        String[] date = this.date.toString().split(" ", 4);
-//        for (int i = 0; i < 3; i++) {
-//            sb.append(date[i] + " ");
-//        }
-//        return sb.toString();
-//    }
-
-//    private String getDate(Date d) {
-//        StringBuilder sb = new StringBuilder();
-//        String[] date = d.toString().split(" ", 4);
-//        for (int i = 0; i < 3; i++) {
-//            sb.append(date[i] + " ");
-//        }
-//        return sb.toString();
-//    }
-
-//    private void setDate() {
-//        long oneDay = 86400000;
-//
-//        TextView currentDate = findViewById(R.id.current_date);
-//        currentDate.setText(getDate());
-//
-//        TextView day2 = findViewById(R.id.day_2_date);
-//        TextView day3 = findViewById(R.id.day_3_date);
-//        TextView day4 = findViewById(R.id.day_4_date);
-//        TextView day5 = findViewById(R.id.day_5_date);
-//
-//        date.setTime(date.getTime() + oneDay);
-//        day2.setText(getDate(date));
-//        date.setTime(date.getTime() + oneDay);
-//        day3.setText(getDate(date));
-//        date.setTime(date.getTime() + oneDay);
-//        day4.setText(getDate(date));
-//        date.setTime(date.getTime() + oneDay);
-//        day5.setText(getDate(date));
-//    }
-
-    class ListenerOnReplace implements View.OnClickListener, Constants{
+    class SettingsListener implements View.OnClickListener, Constants {
 
         Fragment fragment;
-        ImageButton imageButton = findViewById(R.id.settings_button);
 
-        ListenerOnReplace(Fragment fragment){
-            this.fragment = fragment;
+        ImageButton settingsButton = findViewById(R.id.settings_button);
+        ImageButton mainButton = findViewById(R.id.main_button);
+
+        SettingsListener() {
+            this.fragment = new SettingsFragment();
         }
-
-
 
         @Override
         public void onClick(View v) {
+
+            settingsButton.setVisibility(View.GONE);
+            mainButton.setVisibility(View.VISIBLE);
+
             replaceFragment();
-            imageButton.setVisibility(View.GONE);
         }
+
         // Заменить фрагмент
-        private void replaceFragment(){
+        private void replaceFragment() {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.addToBackStack("");
             fragmentTransaction.replace(R.id.linear_parrent, fragment);
             fragmentTransaction.commit();
         }
     }
 
+    class MainListener implements View.OnClickListener {
+
+        Fragment fragment;
+
+        ImageButton settingsButton = findViewById(R.id.settings_button);
+        ImageButton mainButton = findViewById(R.id.main_button);
+
+        MainListener() {
+            this.fragment = new MainFragment();
+        }
+
+        @Override
+        public void onClick(View v) {
+
+            mainButton.setVisibility(View.GONE);
+            settingsButton.setVisibility(View.VISIBLE);
+
+            replaceFragment();
+        }
+
+        private void replaceFragment() {
+            getSupportFragmentManager().popBackStack();
+        }
+    }
 
 
 }
