@@ -2,6 +2,7 @@ package com.joesemper.justweather;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,20 +24,34 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
     final ForecastAdapter adapter = new ForecastAdapter();
-    private String[] days = new String[7];
+    private String[] days = new String[31];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setDate();
+
         final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
         recyclerView.setLayoutManager(new LinearLayoutManager(
                 this, RecyclerView.VERTICAL, false));
         recyclerView.setAdapter(adapter);
         adapter.setDays(Arrays.asList(days));
+        adapter.setOnDayClickListener(new ForecastAdapter.DaysViewHolder.OnDayClickListener() {
+            @Override
+            public void onClicked(String day) {
+//                Toast.makeText(getApplicationContext(), day, Toast.LENGTH_SHORT).show();
+                onDayClicked(day);
+            }
+        });
 
-        setDate();
+
+
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
+        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
+        recyclerView.addItemDecoration(itemDecoration);
+
 
 
 
@@ -94,6 +109,12 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     }
 
+    private void onDayClicked(String day) {
+        Intent intent = new Intent(this, ExtendedActivity.class);
+        intent.putExtra("Date", day);
+        startActivity(intent);
+    }
+
     private void onSettingsClicked() {
         TextView wind = findViewById(R.id.wind_text);
         TextView pressure = findViewById(R.id.pressure_text);
@@ -134,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
         TextView currentDate = findViewById(R.id.current_date);
         currentDate.setText(getDate());
 
-        for (int i = 0; i <7 ; i++) {
+        for (int i = 0; i <days.length ; i++) {
             date.setTime(date.getTime() + oneDay);
             days[i] = getDate(date);
         }

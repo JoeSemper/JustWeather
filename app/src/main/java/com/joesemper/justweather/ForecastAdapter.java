@@ -14,10 +14,17 @@ import java.util.List;
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.DaysViewHolder>  {
 
     private List<String> days;
+    private DaysViewHolder.OnDayClickListener onDayClickListener;
+    private int dayView = R.layout.day_view;
 
     public void setDays (List<String> days) {
         this.days = days;
     }
+
+    public void setOnDayClickListener(DaysViewHolder.OnDayClickListener onDayClickListener) {
+        this.onDayClickListener = onDayClickListener;
+    }
+
 
     @NonNull
     @Override
@@ -29,7 +36,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.DaysVi
 
     @Override
     public void onBindViewHolder(@NonNull DaysViewHolder holder, int position) {
-        holder.bind(days.get(position));
+        holder.bind(days.get(position), onDayClickListener);
     }
 
     @Override
@@ -46,16 +53,31 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.DaysVi
         private final TextView date;
         private final ImageView weatherIcon;
         private final TextView weather;
+        private final View dayView;
 
         public DaysViewHolder(@NonNull View itemView) {
             super(itemView);
             date = itemView.findViewById(R.id.date_text);
             weatherIcon = itemView.findViewById(R.id.weather_icon);
             weather = itemView.findViewById(R.id.day_temperature);
+            dayView = itemView.findViewById(R.id.day_forecast);
         }
 
-        void bind (final String date) {
+        void bind (final String date, final OnDayClickListener onDayClickListener) {
             this.date.setText(date);
+            dayView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(onDayClickListener != null) {
+                        onDayClickListener.onClicked(date);
+                    }
+
+                }
+            });
+        }
+
+        interface OnDayClickListener {
+            void onClicked(String day);
         }
 
     }
