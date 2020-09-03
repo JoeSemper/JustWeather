@@ -2,6 +2,9 @@ package com.joesemper.justweather;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,22 +16,48 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
+    final ForecastAdapter adapter = new ForecastAdapter();
+    private String[] days = new String[31];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setDate();
+
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
+        recyclerView.setLayoutManager(new LinearLayoutManager(
+                this, RecyclerView.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
+        adapter.setDays(Arrays.asList(days));
+        adapter.setOnDayClickListener(new ForecastAdapter.DaysViewHolder.OnDayClickListener() {
+            @Override
+            public void onClicked(String day) {
+//                Toast.makeText(getApplicationContext(), day, Toast.LENGTH_SHORT).show();
+                onDayClicked(day);
+            }
+        });
+
+
+
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
+        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
+        recyclerView.addItemDecoration(itemDecoration);
+
+
+
+
         TextView temperature = findViewById(R.id.temperature);
         ImageButton settingsButton = findViewById(R.id.settings);
 
-        setDate();
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,15 +66,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
             }
         });
 
-        String instanceState;
-
-        if (savedInstanceState == null) {
-            instanceState = "Первый запуск!";
-        } else {
-            instanceState = "Повторный запуск!";
-        }
-        Toast.makeText(getApplicationContext(), instanceState + " - onCreate()", Toast.LENGTH_SHORT).show();
-        Log.d("test", "onCreate()");
     }
 
     @Override
@@ -89,6 +109,12 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     }
 
+    private void onDayClicked(String day) {
+        Intent intent = new Intent(this, ExtendedActivity.class);
+        intent.putExtra("Date", day);
+        startActivity(intent);
+    }
+
     private void onSettingsClicked() {
         TextView wind = findViewById(R.id.wind_text);
         TextView pressure = findViewById(R.id.pressure_text);
@@ -103,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
         intent.putExtra(SETTINGS, parcel);
         startActivityForResult(intent, REQUEST_CODE);
 
-
-//        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     private String getDate() {
@@ -131,19 +155,10 @@ public class MainActivity extends AppCompatActivity implements Constants {
         TextView currentDate = findViewById(R.id.current_date);
         currentDate.setText(getDate());
 
-        TextView day2 = findViewById(R.id.day_2_date);
-        TextView day3 = findViewById(R.id.day_3_date);
-        TextView day4 = findViewById(R.id.day_4_date);
-        TextView day5 = findViewById(R.id.day_5_date);
-
-        date.setTime(date.getTime() + oneDay);
-        day2.setText(getDate(date));
-        date.setTime(date.getTime() + oneDay);
-        day3.setText(getDate(date));
-        date.setTime(date.getTime() + oneDay);
-        day4.setText(getDate(date));
-        date.setTime(date.getTime() + oneDay);
-        day5.setText(getDate(date));
+        for (int i = 0; i <days.length ; i++) {
+            date.setTime(date.getTime() + oneDay);
+            days[i] = getDate(date);
+        }
     }
 
 }

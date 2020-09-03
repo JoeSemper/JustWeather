@@ -8,112 +8,6 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/day_5_date"
-        style="@style/text_style"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/day_2"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="@+id/day_4_date"
-        app:layout_constraintTop_toBottomOf="@+id/day_4_date" />
-
-    <TextView
-        android:id="@+id/day_5_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/temp_2"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_5_date" />
-
-    <ImageView
-        android:id="@+id/day_5_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_5_date"
-        app:srcCompat="@drawable/sunny" />
-
-    <TextView
-        android:id="@+id/day_4_date"
-        style="@style/text_style"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/day_2"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="@+id/day_3_date"
-        app:layout_constraintTop_toBottomOf="@+id/day_3_date" />
-
-    <TextView
-        android:id="@+id/day_4_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/temp_2"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_4_date" />
-
-    <ImageView
-        android:id="@+id/day_4_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_4_date"
-        app:srcCompat="@drawable/sunny" />
-
-    <TextView
-        android:id="@+id/day_3_date"
-        style="@style/text_style"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/day_2"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="@+id/day_2_date"
-        app:layout_constraintTop_toBottomOf="@+id/day_2_date" />
-
-    <ImageView
-        android:id="@+id/day_3_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_3_date"
-        app:srcCompat="@drawable/sunny" />
-
-    <TextView
-        android:id="@+id/day_3_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/temp_2"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_3_date" />
-
-    <ImageView
-        android:id="@+id/day_2_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_2_date"
-        app:srcCompat="@drawable/sunny" />
-
-    <TextView
         android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -195,26 +89,6 @@
         app:srcCompat="@drawable/wind_48px" />
 
     <TextView
-        android:id="@+id/day_2_date"
-        style="@style/text_style"
-        android:layout_marginTop="168dp"
-        android:text="@string/day_2"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="@+id/temperature"
-        app:layout_constraintTop_toBottomOf="@+id/temperature" />
-
-    <TextView
-        android:id="@+id/day_2_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/temp_2"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/day_2_date" />
-
-    <TextView
         android:id="@+id/wind_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -233,5 +107,20 @@
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/wind_text"
         app:layout_constraintTop_toTopOf="@+id/wind_text" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pressure_text">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_forecast"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
