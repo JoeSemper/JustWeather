@@ -37,4 +37,6 @@
     <string name="apply_text">Apply</string>
     <string name="day_2">July 2</string>
     <string name="temp_2">+11  °C</string>
+    <string name="hint">Locatoin</string>
+    <string name="setLocationButton">Set</string>
 </resources>
