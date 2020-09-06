@@ -105,8 +105,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
             location.setText(parcel.location);
 
         }
-
-
     }
 
     private void onDayClicked(String day) {
@@ -131,13 +129,16 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     }
 
-    private String getDate() {
-        StringBuilder sb = new StringBuilder();
-        String[] date = this.date.toString().split(" ", 4);
-        for (int i = 0; i < 3; i++) {
-            sb.append(date[i] + " ");
+    private void setDate() {
+        long oneDay = 86400000;
+
+        TextView currentDate = findViewById(R.id.current_date);
+        currentDate.setText(getDate(date));
+
+        for (int i = 0; i <days.length ; i++) {
+            date.setTime(date.getTime() + oneDay);
+            days[i] = getDate(date);
         }
-        return sb.toString();
     }
 
     private String getDate(Date d) {
@@ -148,17 +149,4 @@ public class MainActivity extends AppCompatActivity implements Constants {
         }
         return sb.toString();
     }
-
-    private void setDate() {
-        long oneDay = 86400000;
-
-        TextView currentDate = findViewById(R.id.current_date);
-        currentDate.setText(getDate());
-
-        for (int i = 0; i <days.length ; i++) {
-            date.setTime(date.getTime() + oneDay);
-            days[i] = getDate(date);
-        }
-    }
-
 }
