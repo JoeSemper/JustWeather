@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,9 +17,19 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.joesemper.justweather.forecast.MainForecast;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements Constants {
 
@@ -26,10 +37,44 @@ public class MainActivity extends AppCompatActivity implements Constants {
     final ForecastAdapter adapter = new ForecastAdapter();
     private String[] days = new String[31];
 
+    private TextView city;
+    private TextView temperature;
+    private TextView pressure;
+    private TextView windSpeed;
+
+    private static final String TAG = "WEATHER";
+    private static final String WEATHER_URL =
+            "https://api.openweathermap.org/data/2.5/weather?q=Moscow,ru&appid=33da5092c9df576f30d4bfe2788922a4";
+
+    private static final String ID = "33da5092c9df576f30d4bfe2788922a4";
+
+//    public TextView getCity() {
+//        return city;
+//    }
+//
+//    public TextView getTemperature() {
+//        return temperature;
+//    }
+//
+//    public TextView getPressure() {
+//        return pressure;
+//    }
+//
+//    public TextView getWindSpeed() {
+//        return windSpeed;
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        city = findViewById(R.id.location);
+        temperature = findViewById(R.id.temperature);
+        pressure = findViewById(R.id.pressure_text);
+        windSpeed = findViewById(R.id.wind_text);
+
+
 
         setDate();
 
@@ -52,10 +97,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
         itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
         recyclerView.addItemDecoration(itemDecoration);
 
-
-
-
-        TextView temperature = findViewById(R.id.temperature);
         ImageButton settingsButton = findViewById(R.id.settings);
 
 
@@ -65,6 +106,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 onSettingsClicked();
             }
         });
+
+//        updateData();
+
 
     }
 
@@ -105,6 +149,13 @@ public class MainActivity extends AppCompatActivity implements Constants {
             location.setText(parcel.location);
 
         }
+        updateData();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updateData();
     }
 
     private void onDayClicked(String day) {
@@ -148,5 +199,59 @@ public class MainActivity extends AppCompatActivity implements Constants {
             sb.append(date[i] + " ");
         }
         return sb.toString();
+    }
+
+    public void updateData() {
+
+        try {
+            TextView city = findViewById(R.id.location);
+            final URL uri = new URL(String.format(
+                    "https://api.openweathermap.org/data/2.5/weather?q=%s,ru&appid=33da5092c9df576f30d4bfe2788922a4", city.getText()));
+            final Handler handler = new Handler(); // Запоминаем основной поток
+            new Thread(new Runnable() {
+                public void run() {
+                    HttpsURLConnection urlConnection = null;
+                    try {
+                        urlConnection = (HttpsURLConnection) uri.openConnection();
+                        urlConnection.setRequestMethod("GET"); // установка метода получения данных -GET
+                        urlConnection.setReadTimeout(10000); // установка таймаута - 10 000 миллисекунд
+                        BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream())); // читаем  данные в поток
+                        String result = getLines(in);
+                        // преобразование данных запроса в модель
+                        Gson gson = new Gson();
+                        final MainForecast mainForecast = gson.fromJson(result, MainForecast.class);
+                        // Возвращаемся к основному потоку
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                displayWeather(mainForecast);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Fail connection", e);
+                        e.printStackTrace();
+                    } finally {
+                        if (null != urlConnection) {
+                            urlConnection.disconnect();
+                        }
+                    }
+                }
+            }).start();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Fail URI", e);
+            e.printStackTrace();
+        }
+    }
+
+
+
+    private String getLines(BufferedReader in) {
+        return in.lines().collect(Collectors.joining("\n"));
+    }
+
+    private void displayWeather(MainForecast mainForecast){
+        temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));
+        pressure.setText(String.format("%d mm Hg", mainForecast.getMain().getPressure()));
+        windSpeed.setText(String.format("%.1f mph", mainForecast.getWind().getSpeed()));
     }
 }

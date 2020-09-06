@@ -9,12 +9,12 @@
 
     <TextView
         android:id="@+id/location"
+        style="@style/text_style_big"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="10dp"
         android:text="@string/strings"
-        style="@style/text_style_big"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
