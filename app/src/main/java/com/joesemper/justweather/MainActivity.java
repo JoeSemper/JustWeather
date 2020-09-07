@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.joesemper.justweather.forecast.MainForecast;
 
@@ -31,38 +33,32 @@ import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 
+
 public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
     final ForecastAdapter adapter = new ForecastAdapter();
-    private String[] days = new String[31];
+    private String[] days = new String[7];
 
     private TextView city;
     private TextView temperature;
     private TextView pressure;
+    private ImageView pressureIcon;
     private TextView windSpeed;
+    private ImageView windIcon;
+    private ImageView mainWeatherIcon;
+    private TextView currentWeather;
 
     private static final String TAG = "WEATHER";
     private static final String WEATHER_URL =
-            "https://api.openweathermap.org/data/2.5/weather?q=Moscow,ru&appid=33da5092c9df576f30d4bfe2788922a4";
+            "https://api.openweathermap.org/data/2.5/weather?q=%s,ru&appid=%s";
 
-    private static final String ID = "33da5092c9df576f30d4bfe2788922a4";
+//    private static final String ID = "33da5092c9df576f30d4bfe2788922a4";
+    private static final String ID =  BuildConfig.WEATHER_API_KEY;
 
-//    public TextView getCity() {
-//        return city;
-//    }
-//
-//    public TextView getTemperature() {
-//        return temperature;
-//    }
-//
-//    public TextView getPressure() {
-//        return pressure;
-//    }
-//
-//    public TextView getWindSpeed() {
-//        return windSpeed;
-//    }
+
+    private static ForecastHolder forecastHolder;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +69,10 @@ public class MainActivity extends AppCompatActivity implements Constants {
         temperature = findViewById(R.id.temperature);
         pressure = findViewById(R.id.pressure_text);
         windSpeed = findViewById(R.id.wind_text);
-
-
+        windIcon = findViewById(R.id.wind_icon);
+        pressureIcon = findViewById(R.id.pressure_icon);
+        mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
+        currentWeather = findViewById(R.id.current_weather);
 
         setDate();
 
@@ -86,20 +84,15 @@ public class MainActivity extends AppCompatActivity implements Constants {
         adapter.setOnDayClickListener(new ForecastAdapter.DaysViewHolder.OnDayClickListener() {
             @Override
             public void onClicked(String day) {
-//                Toast.makeText(getApplicationContext(), day, Toast.LENGTH_SHORT).show();
                 onDayClicked(day);
             }
         });
-
-
 
         DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
         itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
         recyclerView.addItemDecoration(itemDecoration);
 
         ImageButton settingsButton = findViewById(R.id.settings);
-
-
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,9 +100,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
             }
         });
 
-//        updateData();
-
-
+//        forecastHolder = new ForecastHolder();
     }
 
     @Override
@@ -124,32 +115,28 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 parcel = (Parcel) Objects.requireNonNull(data.getExtras()).getSerializable(SETTINGS);
             }
 
-            ImageView windIcon = findViewById(R.id.wind_icon);
-            TextView wind = findViewById(R.id.wind_text);
-            TextView pressure = findViewById(R.id.pressure_text);
-            TextView location = findViewById(R.id.location);
-
             if (parcel == null){
                 return;
             }
             if (!parcel.isWindOn) {
                 windIcon.setVisibility(View.GONE);
-                wind.setVisibility(View.GONE);
+                windSpeed.setVisibility(View.GONE);
             } else {
                 windIcon.setVisibility(View.VISIBLE);
-                wind.setVisibility(View.VISIBLE);
+                windSpeed.setVisibility(View.VISIBLE);
             }
 
             if (!parcel.isPressureOn) {
+                pressureIcon.setVisibility(View.GONE);
                 pressure.setVisibility(View.GONE);
             } else {
+                pressureIcon.setVisibility(View.VISIBLE);
                 pressure.setVisibility(View.VISIBLE);
             }
 
-            location.setText(parcel.location);
+            city.setText(parcel.location);
 
         }
-        updateData();
     }
 
     @Override
@@ -165,14 +152,12 @@ public class MainActivity extends AppCompatActivity implements Constants {
     }
 
     private void onSettingsClicked() {
-        TextView wind = findViewById(R.id.wind_text);
-        TextView pressure = findViewById(R.id.pressure_text);
-        TextView location = findViewById(R.id.location);
+
         Parcel parcel = new Parcel();
 
         parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
-        parcel.isWindOn = wind.getVisibility() == View.VISIBLE;
-        parcel.location = (String) location.getText();
+        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
+        parcel.location = (String) city.getText();
 
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.putExtra(SETTINGS, parcel);
@@ -201,12 +186,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
         return sb.toString();
     }
 
-    public void updateData() {
-
+    private void updateData() {
         try {
-            TextView city = findViewById(R.id.location);
-            final URL uri = new URL(String.format(
-                    "https://api.openweathermap.org/data/2.5/weather?q=%s,ru&appid=33da5092c9df576f30d4bfe2788922a4", city.getText()));
+            final URL uri = new URL(String.format(WEATHER_URL, city.getText(), ID));
             final Handler handler = new Handler(); // Запоминаем основной поток
             new Thread(new Runnable() {
                 public void run() {
@@ -227,9 +209,11 @@ public class MainActivity extends AppCompatActivity implements Constants {
                                 displayWeather(mainForecast);
                             }
                         });
+
                     } catch (Exception e) {
                         Log.e(TAG, "Fail connection", e);
                         e.printStackTrace();
+                        showSnackBar("Fail connection");
                     } finally {
                         if (null != urlConnection) {
                             urlConnection.disconnect();
@@ -240,18 +224,35 @@ public class MainActivity extends AppCompatActivity implements Constants {
         } catch (MalformedURLException e) {
             Log.e(TAG, "Fail URI", e);
             e.printStackTrace();
+            showSnackBar("Fail URI");
         }
     }
 
-
-
+    @SuppressLint("NewApi")
     private String getLines(BufferedReader in) {
         return in.lines().collect(Collectors.joining("\n"));
     }
 
+    @SuppressLint("DefaultLocale")
     private void displayWeather(MainForecast mainForecast){
         temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));
-        pressure.setText(String.format("%d mm Hg", mainForecast.getMain().getPressure()));
+        pressure.setText(String.format("%d hPa", mainForecast.getMain().getPressure()));
         windSpeed.setText(String.format("%.1f mph", mainForecast.getWind().getSpeed()));
+        currentWeather.setText(mainForecast.getWeather()[0].getMain());
+//        mainWeatherIcon.setImageResource(R.drawable.settings);
+    }
+
+    private void showSnackBar(String msg){
+        View view = findViewById(R.id.main_constraint);
+        Snackbar.make(view, msg, Snackbar.LENGTH_INDEFINITE)
+                .setAction("Retry", new MainActivity.OnSnackBarClickListener()).show();
+
+    }
+
+    private class OnSnackBarClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            updateData();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.joesemper.justweather;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.EditText;
@@ -20,36 +21,30 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ForecastHolder {
 
-//    private MainActivity mainActivity;
-//
 //    private static final String TAG = "WEATHER";
 //    private static final String WEATHER_URL =
-//            "https://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%d";
+//            "https://api.openweathermap.org/data/2.5/weather?q=%s,ru&appid=%s";
 //
 //    private static final String ID = "33da5092c9df576f30d4bfe2788922a4";
 //
-//    private TextView city;
-//    private TextView temperature;
-//    private TextView pressure;
-//    private TextView windSpeed;
+//    private MainForecast mainForecast;
 //
-//    public ForecastHolder(MainActivity mainActivity) {
-//        this.mainActivity = mainActivity;
+//
+//    public void setMainForecast(MainForecast mainForecast) {
+//        this.mainForecast = new MainForecast();
+//        this.mainForecast.getMain().setTemp(mainForecast.getMain().getTemp());
+//        this.mainForecast.getMain().setPressure(mainForecast.getMain().getPressure());
+//        this.mainForecast.getWind().setSpeed(mainForecast.getWind().getSpeed());
 //    }
 //
-//    private void init() {
-//        city = mainActivity.getCity();
-//        temperature = mainActivity.getTemperature();
-//        pressure = mainActivity.getPressure();
-//        windSpeed = mainActivity.getWindSpeed();
+//    public MainForecast getForecast(String city) {
+//        updateData(city);
+//        return mainForecast;
 //    }
 //
-//    public void updateData() {
-//
-//        init();
-//
+//    private void updateData(String city) {
 //        try {
-//            final URL uri = new URL(String.format(WEATHER_URL, city.getText(), "RU", ID));
+//            final URL uri = new URL(String.format(WEATHER_URL, city, ID));
 //            final Handler handler = new Handler(); // Запоминаем основной поток
 //            new Thread(new Runnable() {
 //                public void run() {
@@ -67,9 +62,10 @@ public class ForecastHolder {
 //                        handler.post(new Runnable() {
 //                            @Override
 //                            public void run() {
-//                                displayWeather(mainForecast);
+//                                setMainForecast(mainForecast);
 //                            }
 //                        });
+//
 //                    } catch (Exception e) {
 //                        Log.e(TAG, "Fail connection", e);
 //                        e.printStackTrace();
@@ -86,17 +82,10 @@ public class ForecastHolder {
 //        }
 //    }
 //
+//    @SuppressLint("NewApi")
 //    private String getLines(BufferedReader in) {
 //        return in.lines().collect(Collectors.joining("\n"));
 //    }
-//
-//    private void displayWeather(MainForecast mainForecast){
-//        city.setText(mainForecast.getName());
-//        temperature.setText(String.format("%f2", mainForecast.getMain().getTemp()));
-//        pressure.setText(String.format("%d", mainForecast.getMain().getPressure()));
-//        windSpeed.setText(String.format("%d", mainForecast.getWind().getSpeed()));
-//    }
-
-
 }
+
 
