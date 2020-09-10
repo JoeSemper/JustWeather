@@ -75,7 +75,6 @@ public class SettingsActivity extends AppCompatActivity implements Constants{
                     return;
                 } else {
 
-//                    location.clearFocus();
                     hideSoftKeyboard();
 
                     Snackbar.make(view, "Change location?", Snackbar.LENGTH_INDEFINITE)
