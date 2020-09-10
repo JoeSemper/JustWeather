@@ -1,18 +1,13 @@
 package com.joesemper.justweather;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -20,11 +15,12 @@ import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.joesemper.justweather.interfaces.Constants;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class SettingsActivity extends AppCompatActivity implements Constants{
+public class SettingsActivity extends AppCompatActivity implements Constants {
 
     private final String ERROR_TEXT = "Wrong location format";
 

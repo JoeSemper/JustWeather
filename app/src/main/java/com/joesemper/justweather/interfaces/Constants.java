@@ -1,4 +1,4 @@
-package com.joesemper.justweather;
+package com.joesemper.justweather.interfaces;
 
 public interface Constants {
     public static final String SETTINGS = "SETTINGS";

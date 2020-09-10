@@ -5,14 +5,6 @@
     <string name="textview">Sunny</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
-    <string-array name="locations">
-        <item>Moscow</item>
-        <item>Sochi</item>
-        <item>Yekaterinburg</item>
-        <item>Habarovsk</item>
-        <item>Kaluga</item>
-        <item>Vladivostok</item>
-    </string-array>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>

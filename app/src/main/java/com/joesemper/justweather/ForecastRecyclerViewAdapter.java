@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.DaysViewHolder>  {
+public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRecyclerViewAdapter.DaysViewHolder>  {
 
     private List<String> days;
     private DaysViewHolder.OnDayClickListener onDayClickListener;
