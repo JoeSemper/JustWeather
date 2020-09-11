@@ -31,4 +31,7 @@
     <string name="temp_2">+11  °C</string>
     <string name="hint">Locatoin</string>
     <string name="setLocationButton">Set</string>
+    <string name="feels_like">Feels like:</string>
+    <string name="navigation_drawer_open">Open navigation drower</string>
+    <string name="navigation_drawer_close">Close navigation drower</string>
 </resources>
