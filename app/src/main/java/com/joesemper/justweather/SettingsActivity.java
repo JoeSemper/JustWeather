@@ -24,11 +24,13 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
 
     private final String ERROR_TEXT = "Wrong location format";
 
-    TextInputEditText location;
+    private TextInputEditText location;
 
     private String currentLocation;
 
-    Pattern checkLocation = Pattern.compile("^[A-Z][a-z]{2,}$");
+    private Pattern checkLocation = Pattern.compile("^[A-Z][a-z]{2,}$");
+
+    private final Settings settings = Settings.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +89,8 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
         back.setOnClickListener(new OnBackClickListener());
         apply.setOnClickListener(new OnBackClickListener());
 
+//        settings = Settings.getInstance();
+
     }
 
     private void validate(TextView tv) {
@@ -128,6 +132,8 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             parcel.isPressureOn = pressure.isChecked();
             parcel.isWindOn = wind.isChecked();
             parcel.location = currentLocation;
+
+            Settings.addLocation(Objects.requireNonNull(location.getText()).toString());
 
             Intent intentResult = new Intent();
             intentResult.putExtra(SETTINGS, parcel);

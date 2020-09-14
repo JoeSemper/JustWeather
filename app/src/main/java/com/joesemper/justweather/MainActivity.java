@@ -1,5 +1,6 @@
 package com.joesemper.justweather;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,8 +16,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -31,7 +33,8 @@ import java.util.Date;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements Constants {
+public class MainActivity extends AppCompatActivity implements Constants,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private Date date = new Date();
     private String[] days = new String[7];
@@ -49,12 +52,13 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private TextView sunriseSunset;
     private TextView feelsLikeValue;
 
-
     private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
 
     private static ForecastUpdater forecastUpdater = new ForecastUpdateExecutor();
 
     private MainForecast mainForecast;
+
+    private Settings settings;
 
 
 
@@ -71,6 +75,27 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
         setActualDates();
 
+        Toolbar toolbar = initToolbar();
+
+        initDrawer(toolbar);
+
+        settings = Settings.getInstance();
+    }
+
+    private Toolbar initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        return toolbar;
+    }
+
+    private void initDrawer(Toolbar toolbar) {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
 
@@ -191,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements Constants {
     protected void onStart() {
         super.onStart();
 
+        city.setText(Settings.getCurrentLocation());
+
         updateForecast();
         displayWeather(mainForecast);
     }
@@ -252,12 +279,14 @@ public class MainActivity extends AppCompatActivity implements Constants {
             case R.id.action_settings:
                 onSettingsClicked();
                 return true;
-
+            case R.id.action_add_location:
+                Intent intent = new Intent(this, HistorySearchActivity.class);
+                startActivity(intent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
 
     private void onSettingsClicked() {
 
@@ -273,4 +302,33 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_settings:
+                onSettingsClicked();
+                return true;
+            case R.id.nav_cities_list:
+                Intent intent = new Intent(this, HistorySearchActivity.class);
+                startActivity(intent);
+                return true;
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
+    }
 }
