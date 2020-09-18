@@ -13,7 +13,7 @@ import com.joesemper.justweather.R;
 
 public class HistorySearchActivity extends AppCompatActivity {
 
-    private Settings settings;
+    private Settings settings = Settings.getInstance();
 
     private ListView listView;
 
@@ -25,14 +25,14 @@ public class HistorySearchActivity extends AppCompatActivity {
         listView = findViewById(R.id.cities_list);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, Settings.getLocationsHistory());
+                android.R.layout.simple_list_item_1, settings.getLocationsHistory());
 
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Settings.setCurrentLocation(Settings.getLocationsHistory().get(i));
+                settings.setCurrentLocation(settings.getLocationsHistory().get(i));
                 finish();
             }
         });
