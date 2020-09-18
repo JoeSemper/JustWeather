@@ -8,6 +8,7 @@ public class MainForecast {
     private Wind wind;
     private Clouds clouds;
     private String name;
+    private Sys sys;
 
     public Coord getCoord() {
         return coord;
@@ -57,6 +58,12 @@ public class MainForecast {
         this.name = name;
     }
 
+    public Sys getSys() {
+        return sys;
+    }
 
+    public void setSys(Sys sys) {
+        this.sys = sys;
+    }
 }
 

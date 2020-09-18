@@ -1,7 +1,11 @@
 package com.joesemper.justweather;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,11 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
@@ -24,7 +33,8 @@ import java.util.Date;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements Constants {
+public class MainActivity extends AppCompatActivity implements Constants,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private Date date = new Date();
     private String[] days = new String[7];
@@ -37,14 +47,18 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private ImageView windIcon;
     private ImageView mainWeatherIcon;
     private TextView currentWeather;
-    private ImageButton settingsButton;
     private TextView currentDate;
+    private TextView maxMinTemperature;
+    private TextView sunriseSunset;
+    private TextView feelsLikeValue;
 
     private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
 
     private static ForecastUpdater forecastUpdater = new ForecastUpdateExecutor();
 
     private MainForecast mainForecast;
+
+    private Settings settings;
 
 
 
@@ -60,7 +74,30 @@ public class MainActivity extends AppCompatActivity implements Constants {
         setButtonsClickListeners();
 
         setActualDates();
+
+        Toolbar toolbar = initToolbar();
+
+        initDrawer(toolbar);
+
+        settings = Settings.getInstance();
     }
+
+    private Toolbar initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        return toolbar;
+    }
+
+    private void initDrawer(Toolbar toolbar) {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
 
     private void initViewsByID() {
         city = findViewById(R.id.location);
@@ -71,8 +108,11 @@ public class MainActivity extends AppCompatActivity implements Constants {
         pressureIcon = findViewById(R.id.pressure_icon);
         mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
         currentWeather = findViewById(R.id.current_weather);
-        settingsButton = findViewById(R.id.settings);
         currentDate = findViewById(R.id.current_date);
+        maxMinTemperature = findViewById(R.id.max_min_temperature);
+        sunriseSunset = findViewById(R.id.sunrise_sunset);
+        feelsLikeValue = findViewById(R.id.feels_like_value);
+
     }
 
     private void initRecyclerView() {
@@ -101,27 +141,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     private void setButtonsClickListeners() {
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSettingsClicked();
-            }
-        });
-
-    }
-
-    private void onSettingsClicked() {
-
-        Parcel parcel = new Parcel();
-
-        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
-        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
-        parcel.location = (String) city.getText();
-
-        Intent intent = new Intent(this, SettingsActivity.class);
-        intent.putExtra(SETTINGS, parcel);
-        startActivityForResult(intent, REQUEST_CODE);
-
     }
 
     private void setActualDates() {
@@ -143,6 +162,15 @@ public class MainActivity extends AppCompatActivity implements Constants {
         }
         return sb.toString();
     }
+
+    private String getHoursAndMinutes(Date d) {
+        StringBuilder sb = new StringBuilder();
+        String[] date = d.toString().split(" ", 4);
+        String[] hours = date[3].split(":", 3);
+        sb.append(hours[0] + ":" + hours[1]);
+        return sb.toString();
+    }
+
 
 
     @Override
@@ -188,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements Constants {
     protected void onStart() {
         super.onStart();
 
+        city.setText(Settings.getCurrentLocation());
+
         updateForecast();
         displayWeather(mainForecast);
     }
@@ -203,9 +233,22 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private void displayWeather(MainForecast mainForecast){
         temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));
         pressure.setText(String.format("%d hPa", mainForecast.getMain().getPressure()));
-        windSpeed.setText(String.format("%.1f mph", mainForecast.getWind().getSpeed()));
+        windSpeed.setText(String.format("%.1f m/ph", mainForecast.getWind().getSpeed()));
         currentWeather.setText(mainForecast.getWeather()[0].getMain());
+        feelsLikeValue.setText(String.format("%.0f°С", mainForecast.getMain().getFeels_like() - 273));
+        sunriseSunset.setText(String.format("%s/%s",
+                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunrise())),
+                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunset()))));
+        maxMinTemperature.setText(String.format("%.0f°С/%.0f°С",
+                mainForecast.getMain().getTemp_min() - 273,
+                mainForecast.getMain().getTemp_max() - 273));
+
 //        mainWeatherIcon.setImageResource(R.drawable.settings);
+    }
+
+    private Date getDateByMs(long ms){
+        date.setTime(ms);
+        return date;
     }
 
     private void showFailToUpdateSnackBar(String msg){
@@ -218,5 +261,74 @@ public class MainActivity extends AppCompatActivity implements Constants {
                     }
                 }).show();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Обработка выбора пункта меню приложения (активити)
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_settings:
+                onSettingsClicked();
+                return true;
+            case R.id.action_add_location:
+                Intent intent = new Intent(this, HistorySearchActivity.class);
+                startActivity(intent);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void onSettingsClicked() {
+
+        Parcel parcel = new Parcel();
+
+        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
+        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
+        parcel.location = (String) city.getText();
+
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(SETTINGS, parcel);
+        startActivityForResult(intent, REQUEST_CODE);
+
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_settings:
+                onSettingsClicked();
+                return true;
+            case R.id.nav_cities_list:
+                Intent intent = new Intent(this, HistorySearchActivity.class);
+                startActivity(intent);
+                return true;
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
     }
 }
