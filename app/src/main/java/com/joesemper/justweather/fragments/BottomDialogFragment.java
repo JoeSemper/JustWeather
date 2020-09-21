@@ -1,4 +1,4 @@
-package com.joesemper.justweather;
+package com.joesemper.justweather.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.joesemper.justweather.R;
 import com.joesemper.justweather.interfaces.OnDialogListener;
 
 public class BottomDialogFragment extends BottomSheetDialogFragment {
@@ -20,8 +21,6 @@ public class BottomDialogFragment extends BottomSheetDialogFragment {
 
     public static BottomDialogFragment newInstance() {
         return new BottomDialogFragment();
-
-
     }
 
     @Nullable

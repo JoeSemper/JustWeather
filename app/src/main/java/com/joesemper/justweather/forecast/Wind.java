@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class Wind {
+import java.io.Serializable;
+
+public class Wind implements Serializable {
     private float speed;
     private int deg;
 

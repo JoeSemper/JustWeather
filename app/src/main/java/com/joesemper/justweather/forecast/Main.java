@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class Main {
+import java.io.Serializable;
+
+public class Main  implements Serializable {
 
     private float temp;
     private float feels_like;

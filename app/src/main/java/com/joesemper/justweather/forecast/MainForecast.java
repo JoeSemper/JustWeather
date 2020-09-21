@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class MainForecast {
+import java.io.Serializable;
+
+public class MainForecast implements Serializable {
 
     private Coord coord;
     private Weather[] weather;

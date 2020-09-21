@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class Coord {
+import java.io.Serializable;
+
+public class Coord implements Serializable {
 
     private float lat;
     private float lon;

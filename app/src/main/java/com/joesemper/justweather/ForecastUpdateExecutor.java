@@ -14,6 +14,7 @@ import com.joesemper.justweather.interfaces.ForecastUpdater;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -24,28 +25,42 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ForecastUpdateExecutor implements ForecastUpdater {
 
+    private static final String GET_JSON = "GET_JSON";
+    private static final String GET_MAIN_FORECAST = "GET_MAIN_FORECAST";
+
     private static final String TAG = "WEATHER";
     private static final String WEATHER_URL =
             "https://api.openweathermap.org/data/2.5/weather?q=%s,ru&appid=%s";
     private static final String ID = BuildConfig.WEATHER_API_KEY;
 
     private MainForecast mainForecast;
+    private String forecastResultJSON;
 
     private void setMainForecast(MainForecast mainForecast) {
         this.mainForecast = mainForecast;
     }
 
+    public void setForecastResultJSON(String forecastResultJSON) {
+        this.forecastResultJSON = forecastResultJSON;
+    }
+
     @Override
     public MainForecast getForecast(String city) {
-        updateData(city);
+        updateData(city, GET_MAIN_FORECAST);
         return mainForecast;
     }
 
-    private void updateData(String city) {
+    @Override
+    public String getForecastJSON(String city) {
+        updateData(city, GET_JSON);
+        return forecastResultJSON;
+    }
+
+    private void updateData(String city, String mode) {
         try {
             final URL uri = new URL(String.format(WEATHER_URL, city, ID));
 
-            Updater updater = new Updater(uri);
+            Updater updater = new Updater(uri, mode);
             updater.start();
             updater.join();
 
@@ -57,13 +72,14 @@ public class ForecastUpdateExecutor implements ForecastUpdater {
         }
     }
 
-
     private class Updater extends Thread {
 
         URL uri;
+        String mode;
 
-        public Updater(URL uri){
+        public Updater(URL uri, String mode){
             this.uri = uri;
+            this.mode = mode;
         }
 
         @Override
@@ -75,10 +91,14 @@ public class ForecastUpdateExecutor implements ForecastUpdater {
                 urlConnection.setReadTimeout(10000); // установка таймаута - 10 000 миллисекунд
                 BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream())); // читаем  данные в поток
                 final String result = getLines(in);
-                Gson gson = new Gson();
-                final MainForecast mainForecast = gson.fromJson(result, MainForecast.class);
 
-                setMainForecast(mainForecast);
+                if (mode == ForecastUpdateExecutor.GET_JSON){
+                    setForecastResultJSON(result);
+                } else {
+                    Gson gson = new Gson();
+                    final MainForecast mainForecast = gson.fromJson(result, MainForecast.class);
+                    setMainForecast(mainForecast);
+                }
 
             } catch (Exception e) {
                 Log.e(TAG, "Fail connection", e);

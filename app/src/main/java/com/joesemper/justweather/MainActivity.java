@@ -1,42 +1,42 @@
 package com.joesemper.justweather;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.ForecastUpdater;
+import com.joesemper.justweather.maintenance.Settings;
+import com.joesemper.justweather.services.ForecastIntentService;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements Constants,
-        NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements Constants {
 
     private Date date = new Date();
     private String[] days = new String[7];
@@ -60,9 +60,9 @@ public class MainActivity extends AppCompatActivity implements Constants,
 
     private MainForecast mainForecast;
 
-    private Settings settings;
+    private Settings settings = Settings.getInstance();
 
-
+    public static final String BROADCAST_ACTION_UPDATEFINISHED = "com.joesemper.justweather.UPDATEFINISHED";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,29 +77,10 @@ public class MainActivity extends AppCompatActivity implements Constants,
 
         setActualDates();
 
-        Toolbar toolbar = initToolbar();
+        initToolbar();
 
-        initDrawer(toolbar);
-
-        settings = Settings.getInstance();
+        initNotificationChannel();
     }
-
-    private Toolbar initToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        return toolbar;
-    }
-
-    private void initDrawer(Toolbar toolbar) {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
-    }
-
 
     private void initViewsByID() {
         city = findViewById(R.id.location);
@@ -114,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements Constants,
         maxMinTemperature = findViewById(R.id.max_min_temperature);
         sunriseSunset = findViewById(R.id.sunrise_sunset);
         feelsLikeValue = findViewById(R.id.feels_like_value);
+
 
     }
 
@@ -145,6 +127,11 @@ public class MainActivity extends AppCompatActivity implements Constants,
 
     }
 
+    private void initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
     private void setActualDates() {
         long oneDay = 86400000;
 
@@ -173,6 +160,15 @@ public class MainActivity extends AppCompatActivity implements Constants,
         return sb.toString();
     }
 
+    private void initNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager =
+                    (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel mChannel = new NotificationChannel("2", "name", importance);
+            notificationManager.createNotificationChannel(mChannel);
+        }
+    }
 
 
     @Override
@@ -218,10 +214,17 @@ public class MainActivity extends AppCompatActivity implements Constants,
     protected void onStart() {
         super.onStart();
 
+        registerReceiver(updateFinishedReceiver, new IntentFilter(BROADCAST_ACTION_UPDATEFINISHED));
         city.setText(settings.getCurrentLocation());
+        ForecastIntentService.startActionUpdate(MainActivity.this, settings.getCurrentLocation());
+//        updateForecast();
+//        displayWeather(mainForecast);
+    }
 
-        updateForecast();
-        displayWeather(mainForecast);
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(updateFinishedReceiver);
     }
 
     private void updateForecast(){
@@ -231,6 +234,15 @@ public class MainActivity extends AppCompatActivity implements Constants,
         }
     }
 
+
+    private BroadcastReceiver updateFinishedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final MainForecast result = (MainForecast) intent.getSerializableExtra(ForecastIntentService.EXTRA_RESULT);
+            mainForecast = result;
+            displayWeather(result);
+        }
+    };
     @SuppressLint("DefaultLocale")
     private void displayWeather(MainForecast mainForecast){
         temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));
@@ -267,14 +279,13 @@ public class MainActivity extends AppCompatActivity implements Constants,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Обработка выбора пункта меню приложения (активити)
+
         int id = item.getItemId();
 
         switch (id) {
@@ -287,6 +298,21 @@ public class MainActivity extends AppCompatActivity implements Constants,
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void onSettingsClicked() {
+
+        Parcel parcel = new Parcel();
+
+        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
+        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
+        parcel.location = (String) city.getText();
+
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(SETTINGS, parcel);
+        startActivityForResult(intent, REQUEST_CODE);
+
     }
 
     private void onHistoryClicked(){
@@ -305,50 +331,5 @@ public class MainActivity extends AppCompatActivity implements Constants,
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
-    }
-
-
-    private void onSettingsClicked() {
-
-        Parcel parcel = new Parcel();
-
-        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
-        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
-        parcel.location = (String) city.getText();
-
-        Intent intent = new Intent(this, SettingsActivity.class);
-        intent.putExtra(SETTINGS, parcel);
-        startActivityForResult(intent, REQUEST_CODE);
-
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.nav_settings:
-                onSettingsClicked();
-                return true;
-            case R.id.nav_cities_list:
-                Intent intent = new Intent(this, HistorySearchActivity.class);
-                startActivity(intent);
-                return true;
-        }
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
-        else
-            super.onBackPressed();
     }
 }
