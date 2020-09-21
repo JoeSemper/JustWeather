@@ -6,8 +6,8 @@ import java.util.List;
 public class Settings {
 
     private static Settings instance;
-    private static List<String> locationsHistory;
-    private static String currentLocation;
+    private List<String> locationsHistory;
+    private String currentLocation;
 
 
     private Settings() {
@@ -16,18 +16,18 @@ public class Settings {
         setCurrentLocation("Moscow");
     }
 
-    public static Settings getInstance(){
+    public static synchronized Settings getInstance(){
         if (instance == null) {
             instance = new Settings();
         }
         return instance;
     }
 
-    public static List<String> getLocationsHistory() {
+    public List<String> getLocationsHistory() {
         return locationsHistory;
     }
 
-    public static void addLocation(String location){
+    public void addLocation(String location){
         setCurrentLocation(location);
         for (int i = 0; i <locationsHistory.size() ; i++) {
             if (locationsHistory.get(i).equals(location)){
@@ -37,11 +37,11 @@ public class Settings {
         locationsHistory.add(location);
     }
 
-    public static void setCurrentLocation(String currentLocation) {
-        Settings.currentLocation = currentLocation;
+    public void setCurrentLocation(String currentLocation) {
+        this.currentLocation = currentLocation;
     }
 
-    public static String getCurrentLocation() {
+    public String getCurrentLocation() {
         return currentLocation;
     }
 }

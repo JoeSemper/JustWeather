@@ -3,6 +3,7 @@ package com.joesemper.justweather;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -216,14 +218,14 @@ public class MainActivity extends AppCompatActivity implements Constants,
     protected void onStart() {
         super.onStart();
 
-        city.setText(Settings.getCurrentLocation());
+        city.setText(settings.getCurrentLocation());
 
         updateForecast();
         displayWeather(mainForecast);
     }
 
     private void updateForecast(){
-        mainForecast = forecastUpdater.getForecast(city.getText().toString());
+        mainForecast = forecastUpdater.getForecast(settings.getCurrentLocation());
         if (mainForecast == null){
             showFailToUpdateSnackBar("Fail to update data");
         }
@@ -279,14 +281,32 @@ public class MainActivity extends AppCompatActivity implements Constants,
             case R.id.action_settings:
                 onSettingsClicked();
                 return true;
-            case R.id.action_add_location:
-                Intent intent = new Intent(this, HistorySearchActivity.class);
-                startActivity(intent);
+            case R.id.action_history:
+                onHistoryClicked();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void onHistoryClicked(){
+        String[] items = new String[settings.getLocationsHistory().size()];
+        settings.getLocationsHistory().toArray(items);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.history)
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        settings.setCurrentLocation(settings.getLocationsHistory().get(i));
+                        city.setText(settings.getCurrentLocation());
+                        updateForecast();
+                        displayWeather(mainForecast);
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     private void onSettingsClicked() {
 

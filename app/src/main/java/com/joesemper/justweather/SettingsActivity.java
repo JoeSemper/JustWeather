@@ -12,10 +12,12 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.joesemper.justweather.interfaces.Constants;
+import com.joesemper.justweather.interfaces.OnDialogListener;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -31,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
     private Pattern checkLocation = Pattern.compile("^[A-Z][a-z]{2,}$");
 
     private final Settings settings = Settings.getInstance();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,7 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             }
         });
 
+
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,8 +79,13 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
 
                     hideSoftKeyboard();
 
-                    Snackbar.make(view, "Change location?", Snackbar.LENGTH_INDEFINITE)
-                            .setAction("Yes", new OnSnackBarClickListener()).show();
+                    BottomDialogFragment bottomSheetDialogFragment = BottomDialogFragment.newInstance();
+                    bottomSheetDialogFragment.setOnDialogListener(dialogListener);
+                    bottomSheetDialogFragment.show(getSupportFragmentManager(), "dialog_fragment");
+
+
+//                    Snackbar.make(view, "Change location?", Snackbar.LENGTH_INDEFINITE)
+//                            .setAction("Yes", new OnSnackBarClickListener()).show();
 
                 }
             }
@@ -133,7 +142,7 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             parcel.isWindOn = wind.isChecked();
             parcel.location = currentLocation;
 
-            Settings.addLocation(Objects.requireNonNull(location.getText()).toString());
+            settings.addLocation(currentLocation);
 
             Intent intentResult = new Intent();
             intentResult.putExtra(SETTINGS, parcel);
@@ -144,10 +153,25 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
     }
 
     private void hideSoftKeyboard () {
+        TextInputLayout textInputLayout = findViewById(R.id.textInputLayout);
+        if(!textInputLayout.isFocused()){
+            return;
+        }
         Activity activity = this;
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService (Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow (activity.getCurrentFocus (). getWindowToken (), 0);
     }
+
+    private OnDialogListener dialogListener = new OnDialogListener() {
+        @Override
+        public void onDialogNo() {
+
+        }
+        @Override
+        public void onDialogYes() {
+            currentLocation = Objects.requireNonNull(location.getText()).toString();
+        }
+    };
 
 
 
