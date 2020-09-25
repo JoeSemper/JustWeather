@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private void initRecyclerView() {
         final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
         recyclerView.setLayoutManager(new LinearLayoutManager(
-                this, RecyclerView.VERTICAL, false));
+                this, RecyclerView.HORIZONTAL, false));
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setDays(Arrays.asList(days));
         recyclerViewAdapter.setOnDayClickListener(new ForecastRecyclerViewAdapter.DaysViewHolder.OnDayClickListener() {
