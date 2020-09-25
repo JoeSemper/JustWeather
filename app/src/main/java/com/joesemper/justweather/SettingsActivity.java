@@ -12,12 +12,13 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.joesemper.justweather.fragments.BottomDialogFragment;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.OnDialogListener;
+import com.joesemper.justweather.maintenance.Settings;
 
 import java.util.Objects;
 import java.util.regex.Pattern;

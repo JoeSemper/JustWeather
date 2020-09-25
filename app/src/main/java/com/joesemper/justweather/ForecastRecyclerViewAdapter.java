@@ -48,7 +48,7 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
     }
 
 
-    static class DaysViewHolder extends RecyclerView.ViewHolder {
+    public static class DaysViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView date;
         private final ImageView weatherIcon;

@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class Sys {
+import java.io.Serializable;
+
+public class Sys implements Serializable {
 
     private long sunrise;
     private long sunset;

@@ -1,6 +1,8 @@
 package com.joesemper.justweather.forecast;
 
-public class Clouds {
+import java.io.Serializable;
+
+public class Clouds implements Serializable {
     private int all;
 
     public int getAll() {

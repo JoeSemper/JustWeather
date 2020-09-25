@@ -1,4 +1,4 @@
-package com.joesemper.justweather;
+package com.joesemper.justweather.maintenance;
 
 import java.util.LinkedList;
 import java.util.List;
