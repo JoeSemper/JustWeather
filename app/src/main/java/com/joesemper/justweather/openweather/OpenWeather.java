@@ -1,16 +1,29 @@
 package com.joesemper.justweather.openweather;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class OpenWeather implements Serializable {
 
+    @SerializedName("lat")
+    @Expose
     private float lat;
+    @SerializedName("lon")
+    @Expose
     private float lon;
 
+    @SerializedName("current")
+    @Expose
     private Current current;
 
+    @SerializedName("hourly")
+    @Expose
     private Hourly[] hourly;
 
+    @SerializedName("daily")
+    @Expose
     private Daily[] daily;
 
     public float getLat() {

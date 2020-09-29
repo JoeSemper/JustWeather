@@ -1,9 +1,16 @@
 package com.joesemper.justweather.forecast;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Wind implements Serializable {
+    @SerializedName("speed")
+    @Expose
     private float speed;
+    @SerializedName("deg")
+    @Expose
     private int deg;
 
     public int getDeg() {

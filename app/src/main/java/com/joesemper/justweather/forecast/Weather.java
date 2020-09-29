@@ -1,9 +1,16 @@
 package com.joesemper.justweather.forecast;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Weather implements Serializable {
+    @SerializedName("main")
+    @Expose
     private String main;
+    @SerializedName("description")
+    @Expose
     private String description;
 
     public String getDescription() {

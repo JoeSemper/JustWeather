@@ -1,17 +1,38 @@
 package com.joesemper.justweather.openweather;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Current implements Serializable {
 
+    @SerializedName("dt")
+    @Expose
     private long dt;
+    @SerializedName("sunrise")
+    @Expose
     private long sunrise;
+    @SerializedName("sunset")
+    @Expose
     private long sunset;
+    @SerializedName("temp")
+    @Expose
     private float temp;
+    @SerializedName("feels_like")
+    @Expose
     private float feels_like;
+    @SerializedName("pressure")
+    @Expose
     private long pressure;
+    @SerializedName("humidity")
+    @Expose
     private int humidity;
+    @SerializedName("wind_speed")
+    @Expose
     private float wind_speed;
+    @SerializedName("wind_deg")
+    @Expose
     private int wind_deg;
 
     private Weather[] weather;

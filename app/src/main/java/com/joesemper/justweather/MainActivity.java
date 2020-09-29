@@ -22,18 +22,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.ForecastUpdater;
+import com.joesemper.justweather.interfaces.WeatherRequest;
 import com.joesemper.justweather.maintenance.Settings;
+import com.joesemper.justweather.openweather.OpenWeather;
 import com.joesemper.justweather.services.ForecastIntentService;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class MainActivity extends AppCompatActivity implements Constants {
@@ -59,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private static ForecastUpdater forecastUpdater = new ForecastUpdateExecutor();
 
     private MainForecast mainForecast;
+    private OpenWeather openWeather;
+    private WeatherRequest weatherRequest;
+    private static final String ID = BuildConfig.WEATHER_API_KEY;
 
     private Settings settings = Settings.getInstance();
 
@@ -80,9 +93,18 @@ public class MainActivity extends AppCompatActivity implements Constants {
         initToolbar();
 
         initNotificationChannel();
+
+        initRetrofit();
+    }
+    private void initRetrofit() {
+        Retrofit retrofit;
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/")
+                .addConverterFactory(GsonConverterFactory.create()).build();
+        weatherRequest = retrofit.create(WeatherRequest.class);
     }
 
-    private void initViewsByID() {
+        private void initViewsByID() {
         city = findViewById(R.id.location);
         temperature = findViewById(R.id.temperature);
         pressure = findViewById(R.id.pressure_text);
@@ -102,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private void initRecyclerView() {
         final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
         recyclerView.setLayoutManager(new LinearLayoutManager(
-                this, RecyclerView.HORIZONTAL, false));
+                this, RecyclerView.VERTICAL, false));
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setDays(Arrays.asList(days));
         recyclerViewAdapter.setOnDayClickListener(new ForecastRecyclerViewAdapter.DaysViewHolder.OnDayClickListener() {
@@ -214,35 +236,58 @@ public class MainActivity extends AppCompatActivity implements Constants {
     protected void onStart() {
         super.onStart();
 
-        registerReceiver(updateFinishedReceiver, new IntentFilter(BROADCAST_ACTION_UPDATEFINISHED));
+//        registerReceiver(updateFinishedReceiver, new IntentFilter(BROADCAST_ACTION_UPDATEFINISHED));
         city.setText(settings.getCurrentLocation());
-        ForecastIntentService.startActionUpdate(MainActivity.this, settings.getCurrentLocation());
+        requestRetrofit(settings.getCurrentLocation(), ID);
+//        ForecastIntentService.startActionUpdate(MainActivity.this, settings.getCurrentLocation());
 //        updateForecast();
 //        displayWeather(mainForecast);
+
     }
+
+    private void requestRetrofit(final String city, String keyApi) {
+        weatherRequest.loadWeather(city, keyApi)
+                .enqueue(new Callback<MainForecast>() {
+                    @Override
+                    public void onResponse(Call<MainForecast> call, Response<MainForecast> response) {
+                        if (response.body() != null) {
+                            mainForecast = response.body();
+                            displayWeather(mainForecast);
+                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<MainForecast> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterReceiver(updateFinishedReceiver);
+//        unregisterReceiver(updateFinishedReceiver);
     }
 
     private void updateForecast(){
-        mainForecast = forecastUpdater.getForecast(settings.getCurrentLocation());
+        requestRetrofit(settings.getCurrentLocation(), ID);
         if (mainForecast == null){
             showFailToUpdateSnackBar("Fail to update data");
         }
     }
 
 
-    private BroadcastReceiver updateFinishedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final MainForecast result = (MainForecast) intent.getSerializableExtra(ForecastIntentService.EXTRA_RESULT);
-            mainForecast = result;
-            displayWeather(result);
-        }
-    };
+//    private BroadcastReceiver updateFinishedReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            final MainForecast result = (MainForecast) intent.getSerializableExtra(ForecastIntentService.EXTRA_RESULT);
+//            mainForecast = result;
+//            displayWeather(result);
+//        }
+//    };
     @SuppressLint("DefaultLocale")
     private void displayWeather(MainForecast mainForecast){
         temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));

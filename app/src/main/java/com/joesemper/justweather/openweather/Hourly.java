@@ -1,11 +1,20 @@
 package com.joesemper.justweather.openweather;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Hourly implements Serializable {
 
+    @SerializedName("dt")
+    @Expose
     private long dt;
+    @SerializedName("temp")
+    @Expose
     private float temp;
+    @SerializedName("weather")
+    @Expose
     private Weather[] weather;
 
     public long getDt() {

@@ -1,15 +1,32 @@
 package com.joesemper.justweather.forecast;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class MainForecast implements Serializable {
 
+    @SerializedName("coord")
+    @Expose
     private Coord coord;
+    @SerializedName("weather")
+    @Expose
     private Weather[] weather;
+    @SerializedName("main")
+    @Expose
     private Main main;
+    @SerializedName("wind")
+    @Expose
     private Wind wind;
+    @SerializedName("clouds")
+    @Expose
     private Clouds clouds;
+    @SerializedName("name")
+    @Expose
     private String name;
+    @SerializedName("sys")
+    @Expose
     private Sys sys;
 
     public Coord getCoord() {

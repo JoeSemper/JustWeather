@@ -1,17 +1,32 @@
 package com.joesemper.justweather.openweather;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Daily implements Serializable {
 
+    @SerializedName("dt")
+    @Expose
     private long dt;
 
+    @SerializedName("temp")
+    @Expose
     private Temp temp;
 
+    @SerializedName("pressure")
+    @Expose
     private int pressure;
+    @SerializedName("wind_speed")
+    @Expose
     private float wind_speed;
+    @SerializedName("wind_deg")
+    @Expose
     private float wind_deg;
 
+    @SerializedName("weather")
+    @Expose
     private Weather[] weather;
 
     public long getDt() {
