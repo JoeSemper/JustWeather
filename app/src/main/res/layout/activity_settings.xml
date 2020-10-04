@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/icons"
+    android:outlineProvider="none"
     android:theme="@style/Theme.MaterialComponents"
     tools:context=".SettingsActivity">
 
@@ -40,28 +41,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/settings" />
 
-    <Switch
-        android:id="@+id/wind_check"
-        android:layout_width="170dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/wind_speed"
-        android:textColor="@color/textColor"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/set_button"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-    <Switch
-        android:id="@+id/pressure_check"
-        android:layout_width="170dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/pressure"
-        android:textColor="@color/textColor"
-        app:layout_constraintStart_toStartOf="@+id/wind_check"
-        app:layout_constraintTop_toBottomOf="@+id/wind_check"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"
         android:layout_width="0dp"
@@ -90,6 +69,93 @@
         android:text="@string/setLocationButton"
         app:layout_constraintEnd_toEndOf="@+id/textInputLayout"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <TextView
+        android:id="@+id/units"
+        style="@style/text_style_simple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Units"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/set_button" />
+
+    <TableRow
+        android:id="@+id/temperaure_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="4dp"
+        app:layout_constraintStart_toStartOf="@+id/units"
+        app:layout_constraintTop_toBottomOf="@+id/units">
+
+        <TextView
+            android:id="@+id/temp_units_settings"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Temperature:" />
+
+        <TextView
+            android:id="@+id/temp_units"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="°C" />
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/pressure_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:padding="4dp"
+        app:layout_constraintStart_toStartOf="@+id/temperaure_row"
+        app:layout_constraintTop_toBottomOf="@+id/temperaure_row">
+
+        <TextView
+            android:id="@+id/pressure_units_settings"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pressure:" />
+
+        <TextView
+            android:id="@+id/pressure_units"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="mm Hg" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/wind_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="4dp"
+        app:layout_constraintStart_toStartOf="@+id/pressure_row"
+        app:layout_constraintTop_toBottomOf="@+id/pressure_row">
+
+        <TextView
+            android:id="@+id/wind_units_settings"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wind Speed:" />
+
+        <TextView
+            android:id="@+id/wind_units"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="m/s" />
+
+    </TableRow>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,12 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
@@ -18,9 +22,14 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.joesemper.justweather.fragments.BottomDialogFragment;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.OnDialogListener;
+import com.joesemper.justweather.maintenance.App;
+import com.joesemper.justweather.maintenance.Location;
+import com.joesemper.justweather.maintenance.SearchHistoryDao;
 import com.joesemper.justweather.maintenance.Settings;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class SettingsActivity extends AppCompatActivity implements Constants {
@@ -28,8 +37,21 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
     private final String ERROR_TEXT = "Wrong location format";
 
     private TextInputEditText location;
-
     private String currentLocation;
+    private TableRow rowTemperature;
+    private TableRow rowPressure;
+    private TableRow rowWindSpeed;
+    private TextView temperatureUnits;
+    private TextView pressureUnits;
+    private TextView windUnits;
+
+    private String tempUnitsText;
+    private String pressureUnitsText;
+    private String windUnitsText;
+
+    private MaterialButton setButton;
+    private ImageButton back;
+    private MaterialButton apply;
 
     private Pattern checkLocation = Pattern.compile("^[A-Z][a-z]{2,}$");
 
@@ -41,19 +63,50 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch wind = findViewById(R.id.wind_check);
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch pressure = findViewById(R.id.pressure_check);
+        initViews();
+
+        setOnUnitsClickListeners();
+
+        loadPreferences();
+
+        setOnButtonsClickListeners();
+
+    }
+
+    private void initViews() {
+        rowTemperature = findViewById(R.id.temperaure_row);
+        rowPressure = findViewById(R.id.pressure_row);
+        rowWindSpeed = findViewById(R.id.wind_row);
+        temperatureUnits = findViewById(R.id.temp_units);
+        pressureUnits = findViewById(R.id.pressure_units);
+        windUnits = findViewById(R.id.wind_units);
         location = findViewById(R.id.locatinon_text_input);
-        final MaterialButton setButton = findViewById(R.id.set_button);
 
-        Parcel parcel = (Parcel) Objects.requireNonNull(getIntent().getExtras()).getSerializable(SETTINGS);
+        setButton = findViewById(R.id.set_button);
+        back = findViewById(R.id.back);
+        apply = findViewById(R.id.apply_button);
+    }
 
-        if (parcel != null) {
-            wind.setChecked(parcel.isWindOn);
-            pressure.setChecked(parcel.isPressureOn);
-            location.setText(parcel.location);
-            currentLocation = parcel.location;
-        }
+    private void loadPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+        tempUnitsText = sharedPreferences.getString("Temp", "°C");
+        pressureUnitsText = sharedPreferences.getString("Pres", "mm Hg");
+        windUnitsText  = sharedPreferences.getString("Wind", "m/s");
+        currentLocation = sharedPreferences.getString("City", "Moscow");
+
+        temperatureUnits.setText(tempUnitsText);
+        pressureUnits.setText(pressureUnitsText);
+        windUnits.setText(windUnitsText);
+        location.setText(currentLocation);
+    }
+
+    private void setOnUnitsClickListeners() {
+        rowTemperature.setOnClickListener(new OnUnitsClickListener(OnUnitsClickListener.TEMPERATURE));
+        rowPressure.setOnClickListener(new OnUnitsClickListener(OnUnitsClickListener.PRESSURE));
+        rowWindSpeed.setOnClickListener(new OnUnitsClickListener(OnUnitsClickListener.WIND));
+    }
+
+    private void setOnButtonsClickListeners() {
 
         location.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -61,12 +114,10 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
                 if(hasFocus) {
                     return;
                 }
-
                 TextView tv = (TextView) view;
                 validate(tv);
             }
         });
-
 
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,23 +135,64 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
                     bottomSheetDialogFragment.setOnDialogListener(dialogListener);
                     bottomSheetDialogFragment.show(getSupportFragmentManager(), "dialog_fragment");
 
-
-//                    Snackbar.make(view, "Change location?", Snackbar.LENGTH_INDEFINITE)
-//                            .setAction("Yes", new OnSnackBarClickListener()).show();
-
                 }
             }
         });
 
-
-        ImageButton back = findViewById(R.id.back);
-        MaterialButton apply = findViewById(R.id.apply_button);
-
         back.setOnClickListener(new OnBackClickListener());
         apply.setOnClickListener(new OnBackClickListener());
+    }
 
-//        settings = Settings.getInstance();
+    private class OnUnitsClickListener implements View.OnClickListener {
 
+        public static final String TEMPERATURE = "TEMP";
+        public static final String PRESSURE = "PRES";
+        public static final String WIND = "WIND";
+
+        private String title;
+
+        private TextView textView;
+
+        String[] items;
+
+        final int[] chosen = {-1};
+
+        OnUnitsClickListener(String unit){
+            if(unit.equals(TEMPERATURE)){
+                items = getResources().getStringArray(R.array.choose_temp);
+                title = "Temperature Units";
+                textView = temperatureUnits;
+            } else if (unit.equals(PRESSURE)){
+                items = getResources().getStringArray(R.array.choose_pressure);
+                title = "Pressure Units";
+                textView = pressureUnits;
+            } else {
+                items = getResources().getStringArray(R.array.choose_wind_speed);
+                title = "Wind Speed Units";
+                textView = windUnits;
+            }
+        }
+
+        @Override
+        public void onClick(View view) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+            builder.setTitle(title).setSingleChoiceItems(items, chosen[0], new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    chosen[0] = i;
+                }
+            }).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    if (chosen[0] == -1){
+                        return;
+                    }
+                    textView.setText(items[chosen[0]]);
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     private void validate(TextView tv) {
@@ -122,34 +214,31 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
         view.setError(null);
     }
 
-    private class OnSnackBarClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            currentLocation = Objects.requireNonNull(location.getText()).toString();
-        }
-    }
 
     private class OnBackClickListener implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
 
-            Parcel parcel = new Parcel();
+            SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("Temp", temperatureUnits.getText().toString());
+            editor.putString("Pres", pressureUnits.getText().toString());
+            editor.putString("Wind", windUnits.getText().toString());
+            editor.putString("City", currentLocation);
+            editor.commit();
 
-            @SuppressLint("UseSwitchCompatOrMaterialCode") Switch wind = findViewById(R.id.wind_check);
-            @SuppressLint("UseSwitchCompatOrMaterialCode") Switch pressure = findViewById(R.id.pressure_check);
-
-            parcel.isPressureOn = pressure.isChecked();
-            parcel.isWindOn = wind.isChecked();
-            parcel.location = currentLocation;
-
-            settings.addLocation(currentLocation);
-
-            Intent intentResult = new Intent();
-            intentResult.putExtra(SETTINGS, parcel);
-            setResult(OK, intentResult);
+            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+            List<Location> list = searchHistoryDao.getAllLocations();
+            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
+                if(list.get(i).location.equals(currentLocation)){
+                    finish();
+                }
+            }
+            Location location = new Location();
+            location.location = currentLocation;
+            searchHistoryDao.insertLocation(location);
             finish();
-
         }
     }
 
@@ -173,9 +262,5 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             currentLocation = Objects.requireNonNull(location.getText()).toString();
         }
     };
-
-
-
-
 
 }

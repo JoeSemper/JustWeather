@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,324 +10,317 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_list"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="wrap_content">
 
+        <ImageView
+            android:id="@+id/main_weather_icon"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            app:layout_constraintBottom_toBottomOf="@+id/temperature"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/temperature"
+            app:layout_constraintTop_toTopOf="@+id/temperature"
+            app:srcCompat="@drawable/sunny" />
 
-    <TextView
-        android:id="@+id/location"
-        style="@style/text_style_big"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:padding="10dp"
-        android:text="@string/strings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/current_date"
+            style="@style/text_style_big"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            android:text="July 1"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/location" />
 
-    <TextView
-        android:id="@+id/current_date"
-        style="@style/text_style_big"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:padding="4dp"
-        android:text="July 1"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/location"
-        app:layout_constraintStart_toStartOf="@+id/location"
-        app:layout_constraintTop_toBottomOf="@+id/location" />
+        <TextView
+            android:id="@+id/temperature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/temp"
+            android:textSize="52sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.25"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/current_date" />
 
-    <TextView
-        android:id="@+id/temperature"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/temp"
-        android:textSize="52sp"
-        app:layout_constraintEnd_toEndOf="@+id/tableLayout"
-        app:layout_constraintHorizontal_bias="0.2"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout"
-        app:layout_constraintTop_toBottomOf="@+id/current_date" />
-
-    <ImageView
-        android:id="@+id/main_weather_icon"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
-        app:layout_constraintEnd_toEndOf="@+id/tableLayout"
-        app:layout_constraintStart_toEndOf="@+id/temperature"
-        app:layout_constraintTop_toTopOf="@+id/temperature"
-        app:srcCompat="@drawable/sunny" />
-
-    <TextView
-        android:id="@+id/current_weather"
-        style="@style/text_style_simple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textview"
-        app:layout_constraintEnd_toEndOf="@+id/main_weather_icon"
-        app:layout_constraintStart_toStartOf="@+id/main_weather_icon"
-        app:layout_constraintTop_toBottomOf="@+id/main_weather_icon" />
-
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hourly_forecast_table">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_forecast"
+        <FrameLayout
+            android:id="@+id/frameLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
-
-    <TableLayout
-        android:id="@+id/tableLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/current_weather">
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center|center_horizontal|center_vertical">
-
-            <ImageView
-                android:id="@+id/wind_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:padding="2dp"
-                app:srcCompat="@drawable/wind" />
-
-            <TextView
-                android:id="@+id/wind_text"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/wind" />
-
-            <Space
-                android:layout_width="48dp"
-                android:layout_height="wrap_content" />
-
-            <ImageView
-                android:id="@+id/max_min_temperature_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:srcCompat="@drawable/temperature" />
-
-            <TextView
-                android:id="@+id/max_min_temperature"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="9°C/12°C" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center|center_horizontal|center_vertical"
+            android:layout_height="0dp"
             android:layout_marginTop="16dp"
-            android:gravity="center">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hourly_forecast_table">
 
-            <ImageView
-                android:id="@+id/pressure_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:srcCompat="@drawable/pressure" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_forecast"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="never" />
+        </FrameLayout>
 
-            <TextView
-                android:id="@+id/pressure_text"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/pressure_text" />
+        <TextView
+            android:id="@+id/feels_like_value"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="10°C"
+            app:layout_constraintBottom_toBottomOf="@+id/feels_like_text"
+            app:layout_constraintStart_toEndOf="@+id/feels_like_text"
+            app:layout_constraintTop_toTopOf="@+id/feels_like_text" />
 
-            <Space
-                android:layout_width="20dp"
-                android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/current_weather"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textview"
+            app:layout_constraintEnd_toEndOf="@+id/main_weather_icon"
+            app:layout_constraintStart_toStartOf="@+id/main_weather_icon"
+            app:layout_constraintTop_toBottomOf="@+id/main_weather_icon" />
 
-            <ImageView
-                android:id="@+id/sunrise_sunset_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:srcCompat="@drawable/sunrise" />
+        <TableLayout
+            android:id="@+id/tableLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/current_weather">
 
-            <TextView
-                android:id="@+id/sunrise_sunset"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="7:00/10:00" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|center_horizontal|center_vertical">
 
-        </TableRow>
+                <ImageView
+                    android:id="@+id/wind_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:padding="2dp"
+                    app:srcCompat="@drawable/wind" />
 
-    </TableLayout>
+                <TextView
+                    android:id="@+id/wind_text"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/wind" />
 
-    <TextView
-        android:id="@+id/feels_like_text"
-        style="@style/text_style_simple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/feels_like"
-        app:layout_constraintEnd_toEndOf="@+id/temperature"
-        app:layout_constraintHorizontal_bias="0.2"
-        app:layout_constraintStart_toStartOf="@+id/temperature"
-        app:layout_constraintTop_toBottomOf="@+id/temperature" />
+                <Space
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/feels_like_value"
-        style="@style/text_style_simple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="10°C"
-        app:layout_constraintBottom_toBottomOf="@+id/feels_like_text"
-        app:layout_constraintStart_toEndOf="@+id/feels_like_text"
-        app:layout_constraintTop_toBottomOf="@+id/temperature" />
+                <ImageView
+                    android:id="@+id/max_min_temperature_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:srcCompat="@drawable/temperature" />
 
-    <TableLayout
-        android:id="@+id/hourly_forecast_table"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="@+id/tableLayout"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout"
-        app:layout_constraintTop_toBottomOf="@+id/tableLayout">
+                <TextView
+                    android:id="@+id/max_min_temperature"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="9°C/12°C" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            </TableRow>
 
-            <TextView
-                android:id="@+id/time_text_00"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                style="@style/text_style_small"
-                android:text="0:00" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center|center_horizontal|center_vertical"
+                android:layout_marginTop="16dp"
+                android:gravity="center">
 
-            <TextView
-                android:id="@+id/time_text_06"
-                style="@style/text_style_small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="06:00" />
+                <ImageView
+                    android:id="@+id/pressure_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:srcCompat="@drawable/pressure" />
 
-            <TextView
-                android:id="@+id/time_text_12"
-                style="@style/text_style_small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="12:00" />
+                <TextView
+                    android:id="@+id/pressure_text"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/pressure_text" />
 
-            <TextView
-                android:id="@+id/time_text_18"
-                style="@style/text_style_small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="18:00" />
-        </TableRow>
+                <Space
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <ImageView
+                    android:id="@+id/sunrise_sunset_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:srcCompat="@drawable/sunrise" />
 
-            <ImageView
-                android:id="@+id/weather_icon_00"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                app:srcCompat="@drawable/sunny" />
+                <TextView
+                    android:id="@+id/sunrise_sunset"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="7:00/10:00" />
 
-            <ImageView
-                android:id="@+id/weather_icon_06"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                app:srcCompat="@drawable/sunny" />
+            </TableRow>
 
-            <ImageView
-                android:id="@+id/weather_icon_12"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                app:srcCompat="@drawable/sunny" />
+        </TableLayout>
 
-            <ImageView
-                android:id="@+id/weather_icon_18"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                app:srcCompat="@drawable/sunny" />
-        </TableRow>
+        <TextView
+            android:id="@+id/location"
+            style="@style/text_style_big"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="10dp"
+            android:text="@string/strings"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+        <TextView
+            android:id="@+id/feels_like_text"
+            style="@style/text_style_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feels_like"
+            app:layout_constraintEnd_toEndOf="@+id/temperature"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="@+id/temperature"
+            app:layout_constraintTop_toBottomOf="@+id/temperature" />
 
-            <TextView
-                android:id="@+id/hourly_temp_00"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="10°С" />
+        <TableLayout
+            android:id="@+id/hourly_forecast_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tableLayout">
 
-            <TextView
-                android:id="@+id/hourly_temp_"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="11°С" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/hourly_temp_2"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="9°С" />
+                <TextView
+                    android:id="@+id/time_text_00"
+                    style="@style/text_style_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0:00" />
 
-            <TextView
-                android:id="@+id/hourly_temp_3"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="12°С" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/time_text_06"
+                    style="@style/text_style_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="06:00" />
 
-    </TableLayout>
+                <TextView
+                    android:id="@+id/time_text_12"
+                    style="@style/text_style_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="12:00" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/time_text_18"
+                    style="@style/text_style_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="18:00" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/weather_icon_00"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    app:srcCompat="@drawable/sunny" />
+
+                <ImageView
+                    android:id="@+id/weather_icon_06"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    app:srcCompat="@drawable/sunny" />
+
+                <ImageView
+                    android:id="@+id/weather_icon_12"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    app:srcCompat="@drawable/sunny" />
+
+                <ImageView
+                    android:id="@+id/weather_icon_18"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    app:srcCompat="@drawable/sunny" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/hourly_temp_00"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="10°С" />
+
+                <TextView
+                    android:id="@+id/hourly_temp_"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="11°С" />
+
+                <TextView
+                    android:id="@+id/hourly_temp_2"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="9°С" />
+
+                <TextView
+                    android:id="@+id/hourly_temp_3"
+                    style="@style/text_style_simple"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="12°С" />
+            </TableRow>
+
+        </TableLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
