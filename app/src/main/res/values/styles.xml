@@ -30,7 +30,7 @@
     <style name="text_style_small">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">10sp</item>
         <item name="android:textColor">@color/textColor</item>
     </style>
 
