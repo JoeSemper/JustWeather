@@ -1,6 +1,8 @@
 package com.joesemper.justweather;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkInfo;
@@ -8,7 +10,7 @@ import android.net.wifi.WifiManager;
 
 import androidx.core.app.NotificationCompat;
 
-public class BroadcastReceiver extends BroadcastReceiver {
+public class MyReceiver extends BroadcastReceiver {
 
     private int messageId=0;
 
