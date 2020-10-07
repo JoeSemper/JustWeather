@@ -9,4 +9,20 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <string-array name="choose_temp">
+        <item>°C</item>
+        <item>°F</item>
+    </string-array>
+
+    <string-array name="choose_pressure">
+        <item>mm Hg</item>
+        <item>hPa</item>
+    </string-array>
+
+    <string-array name="choose_wind_speed">
+        <item>m/s</item>
+        <item>m/ph</item>
+    </string-array>
+
 </resources>

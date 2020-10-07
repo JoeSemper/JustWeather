@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,12 +32,15 @@ import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.ForecastUpdater;
 import com.joesemper.justweather.interfaces.WeatherRequest;
+import com.joesemper.justweather.maintenance.App;
+import com.joesemper.justweather.maintenance.Location;
+import com.joesemper.justweather.maintenance.SearchHistoryDao;
 import com.joesemper.justweather.maintenance.Settings;
 import com.joesemper.justweather.openweather.OpenWeather;
-import com.joesemper.justweather.services.ForecastIntentService;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -64,9 +68,11 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private TextView sunriseSunset;
     private TextView feelsLikeValue;
 
-    private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
+    private String tempUnits;
+    private String pressureUnits;
+    private String windUnits;
 
-    private static ForecastUpdater forecastUpdater = new ForecastUpdateExecutor();
+    private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
 
     private MainForecast mainForecast;
     private OpenWeather openWeather;
@@ -75,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     private Settings settings = Settings.getInstance();
 
-    public static final String BROADCAST_ACTION_UPDATEFINISHED = "com.joesemper.justweather.UPDATEFINISHED";
+    private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +102,15 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
         initRetrofit();
     }
+
+    private void loadPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+        tempUnits = sharedPreferences.getString("Temp", "°C");
+        pressureUnits = sharedPreferences.getString("Pres", "mm Hg");
+        windUnits  = sharedPreferences.getString("Wind", "m/s");
+        city.setText(sharedPreferences.getString("City", "Moscow"));
+    }
+
     private void initRetrofit() {
         Retrofit retrofit;
         retrofit = new Retrofit.Builder()
@@ -192,57 +207,13 @@ public class MainActivity extends AppCompatActivity implements Constants {
         }
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode != REQUEST_CODE) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
-        }
-        if (resultCode == OK) {
-            Parcel parcel = null;
-            if (data != null) {
-                parcel = (Parcel) Objects.requireNonNull(data.getExtras()).getSerializable(SETTINGS);
-            }
-            if (parcel == null){
-                return;
-            }
-            updateSettings(parcel);
-        }
-    }
-
-
-    private void updateSettings(Parcel parcel) {
-        if (!parcel.isWindOn) {
-            windIcon.setVisibility(View.GONE);
-            windSpeed.setVisibility(View.GONE);
-        } else {
-            windIcon.setVisibility(View.VISIBLE);
-            windSpeed.setVisibility(View.VISIBLE);
-        }
-
-        if (!parcel.isPressureOn) {
-            pressureIcon.setVisibility(View.GONE);
-            pressure.setVisibility(View.GONE);
-        } else {
-            pressureIcon.setVisibility(View.VISIBLE);
-            pressure.setVisibility(View.VISIBLE);
-        }
-        city.setText(parcel.location);
-    }
-
-
     @Override
     protected void onStart() {
         super.onStart();
 
-//        registerReceiver(updateFinishedReceiver, new IntentFilter(BROADCAST_ACTION_UPDATEFINISHED));
-        city.setText(settings.getCurrentLocation());
-        requestRetrofit(settings.getCurrentLocation(), ID);
-//        ForecastIntentService.startActionUpdate(MainActivity.this, settings.getCurrentLocation());
-//        updateForecast();
-//        displayWeather(mainForecast);
+        loadPreferences();
 
+        requestRetrofit(city.getText().toString(), ID);
     }
 
     private void requestRetrofit(final String city, String keyApi) {
@@ -269,38 +240,30 @@ public class MainActivity extends AppCompatActivity implements Constants {
     @Override
     protected void onStop() {
         super.onStop();
-//        unregisterReceiver(updateFinishedReceiver);
     }
 
     private void updateForecast(){
-        requestRetrofit(settings.getCurrentLocation(), ID);
+        requestRetrofit(city.getText().toString(), ID);
         if (mainForecast == null){
             showFailToUpdateSnackBar("Fail to update data");
         }
     }
 
-
-//    private BroadcastReceiver updateFinishedReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            final MainForecast result = (MainForecast) intent.getSerializableExtra(ForecastIntentService.EXTRA_RESULT);
-//            mainForecast = result;
-//            displayWeather(result);
-//        }
-//    };
     @SuppressLint("DefaultLocale")
     private void displayWeather(MainForecast mainForecast){
-        temperature.setText(String.format("%.0f°С", mainForecast.getMain().getTemp() - 273));
-        pressure.setText(String.format("%d hPa", mainForecast.getMain().getPressure()));
-        windSpeed.setText(String.format("%.1f m/ph", mainForecast.getWind().getSpeed()));
+        temperature.setText(String.format("%.0f%s", mainForecast.getMain().getTemp() - 273, tempUnits));
+        pressure.setText(String.format("%d %s", mainForecast.getMain().getPressure(), pressureUnits));
+        windSpeed.setText(String.format("%.1f %s", mainForecast.getWind().getSpeed(), windUnits));
         currentWeather.setText(mainForecast.getWeather()[0].getMain());
-        feelsLikeValue.setText(String.format("%.0f°С", mainForecast.getMain().getFeels_like() - 273));
+        feelsLikeValue.setText(String.format("%.0f %s", mainForecast.getMain().getFeels_like() - 273, tempUnits));
         sunriseSunset.setText(String.format("%s/%s",
                 getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunrise())),
                 getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunset()))));
-        maxMinTemperature.setText(String.format("%.0f°С/%.0f°С",
+        maxMinTemperature.setText(String.format("%.0f%s/%.0f%s",
                 mainForecast.getMain().getTemp_min() - 273,
-                mainForecast.getMain().getTemp_max() - 273));
+                tempUnits,
+                mainForecast.getMain().getTemp_max() - 273,
+                tempUnits));
 
 //        mainWeatherIcon.setImageResource(R.drawable.settings);
     }
@@ -348,28 +311,32 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     private void onSettingsClicked() {
 
-        Parcel parcel = new Parcel();
-
-        parcel.isPressureOn = pressure.getVisibility() == View.VISIBLE;
-        parcel.isWindOn = windSpeed.getVisibility() == View.VISIBLE;
-        parcel.location = (String) city.getText();
-
         Intent intent = new Intent(this, SettingsActivity.class);
-        intent.putExtra(SETTINGS, parcel);
-        startActivityForResult(intent, REQUEST_CODE);
-
+        startActivity(intent);
     }
 
     private void onHistoryClicked(){
-        String[] items = new String[settings.getLocationsHistory().size()];
-        settings.getLocationsHistory().toArray(items);
+        final String[] items;
+        List<Location>  locations = searchHistoryDao.getAllLocations();
+        if (locations.isEmpty()) {
+            items = new String[]{city.getText().toString()};
+        } else {
+            items = new String[(int) searchHistoryDao.getCountLocations()];
+            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
+                items[i] = locations.get(i).location;
+            }
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.history)
                 .setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        settings.setCurrentLocation(settings.getLocationsHistory().get(i));
-                        city.setText(settings.getCurrentLocation());
+                        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("City", items[i]);
+                        editor.apply();
+                        city.setText(items[i]);
                         updateForecast();
                         displayWeather(mainForecast);
                     }
