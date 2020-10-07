@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
         initNotificationChannel();
 
         initRetrofit();
+
     }
 
     private void loadPreferences() {
