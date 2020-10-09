@@ -1,5 +1,6 @@
 package com.joesemper.justweather;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,16 +19,22 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.ForecastUpdater;
@@ -98,10 +105,31 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
         initToolbar();
 
+        initGetToken();
+
         initNotificationChannel();
 
         initRetrofit();
+
     }
+
+    private void initGetToken() {
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("PushMessage", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        String token = task.getResult().getToken();
+                        Log.d("PushMessage", "Token " + token);
+                    }
+                });
+    }
+
 
     private void loadPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
