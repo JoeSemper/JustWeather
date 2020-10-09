@@ -16,5 +16,12 @@
         android:title="@string/history"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_location"
+        android:icon="@drawable/ic_baseline_add_location_24"
+        android:orderInCategory="10"
+        android:title="@string/history"
+        app:showAsAction="ifRoom" />
+
 
 </menu>

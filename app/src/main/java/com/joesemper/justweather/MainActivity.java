@@ -331,6 +331,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
             case R.id.action_history:
                 onHistoryClicked();
                 return true;
+            case R.id.action_location:
+                onAddLocationClicked();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -371,5 +374,10 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void onAddLocationClicked(){
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 }
