@@ -293,8 +293,20 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 mainForecast.getMain().getTemp_max() - 273,
                 tempUnits));
 
-//        mainWeatherIcon.setImageResource(R.drawable.settings);
+//        mainWeatherIcon.setImageResource();
+//
+//        setMainWeatherIcon(mainForecast);
+
     }
+
+//    private void  setMainWeatherIcon(MainForecast mainForecast){
+//        switch  {
+//            case "10n"||"10d" :
+//
+//        }
+//
+//        mainWeatherIcon.setImageResource();
+//    }
 
     private Date getDateByMs(long ms){
         date.setTime(ms);
