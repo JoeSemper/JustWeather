@@ -293,8 +293,20 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 mainForecast.getMain().getTemp_max() - 273,
                 tempUnits));
 
-//        mainWeatherIcon.setImageResource(R.drawable.settings);
+//        mainWeatherIcon.setImageResource();
+//
+//        setMainWeatherIcon(mainForecast);
+
     }
+
+//    private void  setMainWeatherIcon(MainForecast mainForecast){
+//        switch  {
+//            case "10n"||"10d" :
+//
+//        }
+//
+//        mainWeatherIcon.setImageResource();
+//    }
 
     private Date getDateByMs(long ms){
         date.setTime(ms);
@@ -330,6 +342,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 return true;
             case R.id.action_history:
                 onHistoryClicked();
+                return true;
+            case R.id.action_location:
+                onAddLocationClicked();
                 return true;
         }
 
@@ -371,5 +386,10 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void onAddLocationClicked(){
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 }

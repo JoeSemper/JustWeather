@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "427155817761",
+    "firebase_url": "https://just-weather-eb9e6.firebaseio.com",
+    "project_id": "just-weather-eb9e6",
+    "storage_bucket": "just-weather-eb9e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427155817761:android:cffc5a14b6c9acc40dea60",
+        "android_client_info": {
+          "package_name": "com.joesemper.justweather"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427155817761-2m7okkp2e1hfsdiq1k3i2qi04ds6s93i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.justweather",
+            "certificate_hash": "b5b0153f6b2f7151d8048417aa1542c270f9b3c6"
+          }
+        },
+        {
+          "client_id": "427155817761-2a91sbkrivbfp5302f8cms16ek0kip2h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4M-uSZVTC7ceisEiDtszgaS4dQWAp_ak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427155817761-2a91sbkrivbfp5302f8cms16ek0kip2h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
