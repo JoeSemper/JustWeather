@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
             SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
             List<Location> list = searchHistoryDao.getAllLocations();
             for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
-                if(list.get(i).location.equals(city)){
+                if(list.get(i).city.equals(city.getText().toString())){
                     addToFavorite.setImageResource(R.drawable.ic_star_border);
                     searchHistoryDao.deleteLocation(list.get(i));
                     return;
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
             addToFavorite.setImageResource(R.drawable.ic_star);
             Location location = new Location();
-            location.location = city.getText().toString();
+            location.city = city.getText().toString();
             searchHistoryDao.insertLocation(location);
         });
 
@@ -256,18 +256,18 @@ public class MainActivity extends AppCompatActivity implements Constants {
     protected void onStart() {
         super.onStart();
 
-        checkFavorite();
-
         loadPreferences();
 
         requestRetrofit(city.getText().toString(), ID);
+
+        checkFavorite();
     }
 
     private void checkFavorite() {
         SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
         List<Location> list = searchHistoryDao.getAllLocations();
         for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
-            if (list.get(i).location.equals(city)) {
+            if (list.get(i).city.equals(city.getText().toString())) {
                 addToFavorite.setImageResource(R.drawable.ic_star);
             } else {
                 addToFavorite.setImageResource(R.drawable.ic_star_border);
@@ -418,8 +418,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
         } else {
             items = new String[(int) searchHistoryDao.getCountLocations()];
             for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
-                items[i] = locations.get(i).location;
+                items[i] = locations.get(i).city;
             }
+            checkFavorite();
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -13,6 +13,6 @@ public class Location {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
-    @ColumnInfo(name = "location")
-    public String location;
+    @ColumnInfo(name = "city")
+    public String city;
 }
