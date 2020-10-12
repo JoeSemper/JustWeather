@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private TextView maxMinTemperature;
     private TextView sunriseSunset;
     private TextView feelsLikeValue;
+    private ImageView addToFavorite;
 
     private String tempUnits;
     private String pressureUnits;
@@ -160,8 +161,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
         maxMinTemperature = findViewById(R.id.max_min_temperature);
         sunriseSunset = findViewById(R.id.sunrise_sunset);
         feelsLikeValue = findViewById(R.id.feels_like_value);
-
-
+        addToFavorite = findViewById(R.id.add_to_favarite);
     }
 
     private void initRecyclerView() {
@@ -189,6 +189,23 @@ public class MainActivity extends AppCompatActivity implements Constants {
     }
 
     private void setButtonsClickListeners() {
+
+        addToFavorite.setOnClickListener(view -> {
+            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+            List<Location> list = searchHistoryDao.getAllLocations();
+            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
+                if(list.get(i).location.equals(city)){
+                    addToFavorite.setImageResource(R.drawable.ic_star_border);
+                    searchHistoryDao.deleteLocation(list.get(i));
+                    return;
+                }
+            }
+
+            addToFavorite.setImageResource(R.drawable.ic_star);
+            Location location = new Location();
+            location.location = city.getText().toString();
+            searchHistoryDao.insertLocation(location);
+        });
 
     }
 
@@ -239,9 +256,23 @@ public class MainActivity extends AppCompatActivity implements Constants {
     protected void onStart() {
         super.onStart();
 
+        checkFavorite();
+
         loadPreferences();
 
         requestRetrofit(city.getText().toString(), ID);
+    }
+
+    private void checkFavorite() {
+        SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+        List<Location> list = searchHistoryDao.getAllLocations();
+        for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
+            if (list.get(i).location.equals(city)) {
+                addToFavorite.setImageResource(R.drawable.ic_star);
+            } else {
+                addToFavorite.setImageResource(R.drawable.ic_star_border);
+            }
+        }
     }
 
     private void requestRetrofit(final String city, String keyApi) {
@@ -252,14 +283,14 @@ public class MainActivity extends AppCompatActivity implements Constants {
                         if (response.body() != null) {
                             mainForecast = response.body();
                             displayWeather(mainForecast);
-                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
 
                         }
                     }
 
                     @Override
                     public void onFailure(Call<MainForecast> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -293,20 +324,41 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 mainForecast.getMain().getTemp_max() - 273,
                 tempUnits));
 
-//        mainWeatherIcon.setImageResource();
-//
-//        setMainWeatherIcon(mainForecast);
+
+        setMainWeatherIcon(mainForecast);
 
     }
 
-//    private void  setMainWeatherIcon(MainForecast mainForecast){
-//        switch  {
-//            case "10n"||"10d" :
-//
-//        }
-//
-//        mainWeatherIcon.setImageResource();
-//    }
+    private void  setMainWeatherIcon(MainForecast mainForecast){
+        switch (mainForecast.getWeather()[0].getIcon()) {
+            case "01d":
+                mainWeatherIcon.setImageResource(R.drawable.sunny);
+                return;
+            case "02d":
+                mainWeatherIcon.setImageResource(R.drawable.partly_cloudy);
+                return;
+            case "03d":
+                mainWeatherIcon.setImageResource(R.drawable.clouds);
+                return;
+            case "04d":
+                mainWeatherIcon.setImageResource(R.drawable.clouds);
+                return;
+            case "09d":
+                mainWeatherIcon.setImageResource(R.drawable.heavy_rain);
+                return;
+            case "10d":
+                mainWeatherIcon.setImageResource(R.drawable.rain);
+                return;
+            case "11d":
+                mainWeatherIcon.setImageResource(R.drawable.storm);
+                return;
+            case "13d":
+                mainWeatherIcon.setImageResource(R.drawable.snow);
+                return;
+            default:
+                mainWeatherIcon.setImageResource(R.drawable.partly_cloudy);
+        }
+    }
 
     private Date getDateByMs(long ms){
         date.setTime(ms);

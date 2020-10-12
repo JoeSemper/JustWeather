@@ -228,17 +228,17 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             editor.putString("City", currentLocation);
             editor.commit();
 
-            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
-            List<Location> list = searchHistoryDao.getAllLocations();
-            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
-                if(list.get(i).location.equals(currentLocation)){
-                    finish();
-                }
-            }
-            Location location = new Location();
-            location.location = currentLocation;
-            searchHistoryDao.insertLocation(location);
-            finish();
+//            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+//            List<Location> list = searchHistoryDao.getAllLocations();
+//            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
+//                if(list.get(i).location.equals(currentLocation)){
+//                    finish();
+//                }
+//            }
+//            Location location = new Location();
+//            location.location = currentLocation;
+//            searchHistoryDao.insertLocation(location);
+//            finish();
         }
     }
 
