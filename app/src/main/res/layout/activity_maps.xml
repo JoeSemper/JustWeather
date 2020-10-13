@@ -35,7 +35,7 @@
         map:layout_constraintTop_toBottomOf="@+id/search_address" />
 
     <include
-        layout="@layout/activity_map"
+        layout="@layout/map"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toBottomOf="@+id/search_address"

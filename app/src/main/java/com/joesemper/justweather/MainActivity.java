@@ -1,7 +1,6 @@
 package com.joesemper.justweather;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -11,11 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,10 +20,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -37,18 +32,15 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.joesemper.justweather.forecast.MainForecast;
 import com.joesemper.justweather.interfaces.Constants;
-import com.joesemper.justweather.interfaces.ForecastUpdater;
 import com.joesemper.justweather.interfaces.WeatherRequest;
-import com.joesemper.justweather.maintenance.App;
-import com.joesemper.justweather.maintenance.Location;
-import com.joesemper.justweather.maintenance.SearchHistoryDao;
-import com.joesemper.justweather.maintenance.Settings;
-import com.joesemper.justweather.openweather.OpenWeather;
+import com.joesemper.justweather.database.App;
+import com.joesemper.justweather.database.Location;
+import com.joesemper.justweather.database.SearchHistoryDao;
+import com.joesemper.justweather.forecast.openweather.OpenWeather;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -86,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private OpenWeather openWeather;
     private WeatherRequest weatherRequest;
     private static final String ID = BuildConfig.WEATHER_API_KEY;
+
 
     private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
 

@@ -1,4 +1,4 @@
-package com.joesemper.justweather.openweather;
+package com.joesemper.justweather.forecast.openweather;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

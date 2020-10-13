@@ -1,4 +1,4 @@
-package com.joesemper.justweather.maintenance;
+package com.joesemper.justweather.database;
 
 import androidx.room.Dao;
 import androidx.room.Delete;

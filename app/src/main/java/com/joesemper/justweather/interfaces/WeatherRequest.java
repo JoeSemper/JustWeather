@@ -1,7 +1,6 @@
 package com.joesemper.justweather.interfaces;
 
 import com.joesemper.justweather.forecast.MainForecast;
-import com.joesemper.justweather.openweather.OpenWeather;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

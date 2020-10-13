@@ -3,7 +3,6 @@ package com.joesemper.justweather;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
-import android.widget.Switch;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -28,17 +26,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.joesemper.justweather.fragments.BottomDialogFragment;
 import com.joesemper.justweather.interfaces.Constants;
-import com.joesemper.justweather.interfaces.OnDialogListener;
-import com.joesemper.justweather.maintenance.App;
-import com.joesemper.justweather.maintenance.Location;
-import com.joesemper.justweather.maintenance.SearchHistoryDao;
-import com.joesemper.justweather.maintenance.Settings;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class SettingsActivity extends AppCompatActivity implements Constants {
@@ -63,8 +53,6 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
     private MaterialButton apply;
 
     private Pattern checkLocation = Pattern.compile("^[A-Z][a-z]{2,}$");
-
-    private final Settings settings = Settings.getInstance();
 
     private static final int RC_SIGN_IN = 40404;
     private static final String TAG = "GoogleAuth";
@@ -246,10 +234,7 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
 
                     hideSoftKeyboard();
 
-                    BottomDialogFragment bottomSheetDialogFragment = BottomDialogFragment.newInstance();
-                    bottomSheetDialogFragment.setOnDialogListener(dialogListener);
-                    bottomSheetDialogFragment.show(getSupportFragmentManager(), "dialog_fragment");
-
+                    currentLocation = Objects.requireNonNull(location.getText()).toString();
                 }
             }
         });
@@ -342,6 +327,7 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
             editor.putString("Wind", windUnits.getText().toString());
             editor.putString("City", currentLocation);
             editor.commit();
+            finish();
         }
     }
 
@@ -355,16 +341,5 @@ public class SettingsActivity extends AppCompatActivity implements Constants {
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-    private OnDialogListener dialogListener = new OnDialogListener() {
-        @Override
-        public void onDialogNo() {
-
-        }
-
-        @Override
-        public void onDialogYes() {
-            currentLocation = Objects.requireNonNull(location.getText()).toString();
-        }
-    };
 
 }

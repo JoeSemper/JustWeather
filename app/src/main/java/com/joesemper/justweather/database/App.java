@@ -1,4 +1,4 @@
-package com.joesemper.justweather.maintenance;
+package com.joesemper.justweather.database;
 
 import android.app.Application;
 
