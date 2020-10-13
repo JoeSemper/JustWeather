@@ -34,6 +34,22 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    flavorDimensions 'version'
+    productFlavors {
+        noGoogleMapsConfig {
+            dimension 'version'
+            versionNameSuffix '.free'
+            applicationIdSuffix = '.free'
+        }
+    }
+
+    productFlavors {
+        fullConfig {
+            dimension 'version'
+            versionNameSuffix '.pro'
+            versionNameSuffix '-pro'
+        }
+    }
 }
 
 dependencies {

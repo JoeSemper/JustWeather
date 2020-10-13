@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private WeatherRequest weatherRequest;
     private static final String ID = BuildConfig.WEATHER_API_KEY;
 
-    private Settings settings = Settings.getInstance();
-
     private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
 
     @Override
@@ -200,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements Constants {
                     return;
                 }
             }
-
             addToFavorite.setImageResource(R.drawable.ic_star);
             Location location = new Location();
             location.city = city.getText().toString();

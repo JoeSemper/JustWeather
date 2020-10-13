@@ -20,6 +20,7 @@
         android:id="@+id/action_location"
         android:icon="@drawable/ic_baseline_add_location_24"
         android:orderInCategory="10"
+        android:enabled="false"
         android:title="Add location"
         app:showAsAction="ifRoom" />
 
