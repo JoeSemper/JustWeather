@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -31,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.joesemper.justweather.forecast.MainForecast;
+import com.joesemper.justweather.forecast.WeatherParser;
 import com.joesemper.justweather.interfaces.Constants;
 import com.joesemper.justweather.interfaces.WeatherRequest;
 import com.joesemper.justweather.database.App;
@@ -68,16 +70,21 @@ public class MainActivity extends AppCompatActivity implements Constants {
     private TextView feelsLikeValue;
     private ImageView addToFavorite;
 
-    private String tempUnits;
-    private String pressureUnits;
-    private String windUnits;
+//    private String tempUnits;
+//    private String pressureUnits;
+//    private String windUnits;
 
     private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
 
-    private MainForecast mainForecast;
+//    private MainForecast mainForecast;
     private OpenWeather openWeather;
     private WeatherRequest weatherRequest;
     private static final String ID = BuildConfig.WEATHER_API_KEY;
+
+    private Location currentLocation;
+
+    private float lat;
+    private float lon;
 
 
     private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
@@ -103,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
         initRetrofit();
 
+
     }
 
     private void initGetToken() {
@@ -125,10 +133,19 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     private void loadPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
-        tempUnits = sharedPreferences.getString("Temp", "°C");
-        pressureUnits = sharedPreferences.getString("Pres", "mm Hg");
-        windUnits  = sharedPreferences.getString("Wind", "m/s");
-        city.setText(sharedPreferences.getString("City", "Moscow"));
+//        tempUnits = sharedPreferences.getString("Temp", "°C");
+//        pressureUnits = sharedPreferences.getString("Pres", "mm Hg");
+//        windUnits  = sharedPreferences.getString("Wind", "m/s");
+//        city.setText(sharedPreferences.getString("City", "Moscow"));
+//        lat = sharedPreferences.getFloat("lat", -34);
+//        lon = sharedPreferences.getFloat("lng", 151);
+
+        currentLocation = new Location(
+                sharedPreferences.getString("City", "Moscow"),
+                sharedPreferences.getFloat("lat", -34),
+                sharedPreferences.getFloat("lng", 151));
+
+        city.setText(currentLocation.city);
     }
 
     private void initRetrofit() {
@@ -192,9 +209,9 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 }
             }
             addToFavorite.setImageResource(R.drawable.ic_star);
-            Location location = new Location();
-            location.city = city.getText().toString();
-            searchHistoryDao.insertLocation(location);
+//            Location location = new Location();
+//            location.city = city.getText().toString();
+            searchHistoryDao.insertLocation(currentLocation);
         });
 
     }
@@ -248,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
         loadPreferences();
 
-        requestRetrofit(city.getText().toString(), ID);
+        requestRetrofit(lat, lon, "hourly", ID);
 
         checkFavorite();
     }
@@ -265,22 +282,43 @@ public class MainActivity extends AppCompatActivity implements Constants {
         }
     }
 
-    private void requestRetrofit(final String city, String keyApi) {
-        weatherRequest.loadWeather(city, keyApi)
-                .enqueue(new Callback<MainForecast>() {
+//    private void requestRetrofit(final String city, String keyApi) {
+//        weatherRequest.loadWeather(city, keyApi)
+//                .enqueue(new Callback<MainForecast>() {
+//                    @Override
+//                    public void onResponse(Call<MainForecast> call, Response<MainForecast> response) {
+//                        if (response.body() != null) {
+//                            mainForecast = response.body();
+//                            displayWeather(mainForecast);
+////                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+//
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<MainForecast> call, Throwable t) {
+////                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
+
+    private void requestRetrofit(float lat, float lon, String exclude, String keyApi) {
+        weatherRequest.loadWeather(lat, lon, exclude, keyApi)
+                .enqueue(new Callback<OpenWeather>() {
                     @Override
-                    public void onResponse(Call<MainForecast> call, Response<MainForecast> response) {
+                    public void onResponse(Call<OpenWeather> call, Response<OpenWeather> response) {
                         if (response.body() != null) {
-                            mainForecast = response.body();
-                            displayWeather(mainForecast);
-//                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                            openWeather = response.body();
+                            WeatherParser weatherParser = new WeatherParser(MainActivity.this, openWeather);
+                            displayWeather(weatherParser);
+                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
 
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<MainForecast> call, Throwable t) {
-//                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+                    public void onFailure(Call<OpenWeather> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -292,30 +330,44 @@ public class MainActivity extends AppCompatActivity implements Constants {
     }
 
     private void updateForecast(){
-        requestRetrofit(city.getText().toString(), ID);
-        if (mainForecast == null){
+        requestRetrofit(lat, lon, "hourly", ID);
+        if (openWeather == null){
             showFailToUpdateSnackBar("Fail to update data");
         }
     }
 
-    @SuppressLint("DefaultLocale")
-    private void displayWeather(MainForecast mainForecast){
-        temperature.setText(String.format("%.0f%s", mainForecast.getMain().getTemp() - 273, tempUnits));
-        pressure.setText(String.format("%d %s", mainForecast.getMain().getPressure(), pressureUnits));
-        windSpeed.setText(String.format("%.1f %s", mainForecast.getWind().getSpeed(), windUnits));
-        currentWeather.setText(mainForecast.getWeather()[0].getMain());
-        feelsLikeValue.setText(String.format("%.0f %s", mainForecast.getMain().getFeels_like() - 273, tempUnits));
-        sunriseSunset.setText(String.format("%s/%s",
-                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunrise())),
-                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunset()))));
-        maxMinTemperature.setText(String.format("%.0f%s/%.0f%s",
-                mainForecast.getMain().getTemp_min() - 273,
-                tempUnits,
-                mainForecast.getMain().getTemp_max() - 273,
-                tempUnits));
+//    @SuppressLint("DefaultLocale")
+//    private void displayWeather(MainForecast mainForecast){
+//        temperature.setText(String.format("%.0f%s", mainForecast.getMain().getTemp() - 273, tempUnits));
+//        pressure.setText(String.format("%d %s", mainForecast.getMain().getPressure(), pressureUnits));
+//        windSpeed.setText(String.format("%.1f %s", mainForecast.getWind().getSpeed(), windUnits));
+//        currentWeather.setText(mainForecast.getWeather()[0].getMain());
+//        feelsLikeValue.setText(String.format("%.0f %s", mainForecast.getMain().getFeels_like() - 273, tempUnits));
+//        sunriseSunset.setText(String.format("%s/%s",
+//                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunrise())),
+//                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunset()))));
+//        maxMinTemperature.setText(String.format("%.0f%s/%.0f%s",
+//                mainForecast.getMain().getTemp_min() - 273,
+//                tempUnits,
+//                mainForecast.getMain().getTemp_max() - 273,
+//                tempUnits));
+//
+//
+//        setMainWeatherIcon(mainForecast);
+//
+//    }
+
+    private void displayWeather(WeatherParser weatherParser){
+        temperature.setText(weatherParser.getCurrentTemperature());
+        pressure.setText(weatherParser.getCurrentPressure());
+        windSpeed.setText(weatherParser.getCurrentWindSpeed());
+        currentWeather.setText(weatherParser.getCurrentWeather());
+        feelsLikeValue.setText(weatherParser.getCurrentFeelsLike());
+        sunriseSunset.setText(weatherParser.getSunriseSunset());
+        maxMinTemperature.setText(weatherParser.getCurrentMinMaxTemp());
 
 
-        setMainWeatherIcon(mainForecast);
+//        setMainWeatherIcon(mainForecast);
 
     }
 
@@ -424,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
                         editor.apply();
                         city.setText(items[i]);
                         updateForecast();
-                        displayWeather(mainForecast);
+//                        displayWeather(mainForecast);
                     }
                 });
         AlertDialog alertDialog = builder.create();

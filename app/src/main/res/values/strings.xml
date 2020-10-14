@@ -63,4 +63,12 @@
     <string name="settings">Settings</string>
     <string name="title_activity_maps">Map</string>
 
+    <string name="units_temp_kelvin">°K</string>
+    <string name="units_temp_celsius">°C</string>
+    <string name="units_temp_far">°F</string>
+    <string name="units_pressure">hPa</string>
+    <string name="units_wind_miles">m/h</string>
+    <string name="units_wind_meter">m/s</string>
+
+
 </resources>
