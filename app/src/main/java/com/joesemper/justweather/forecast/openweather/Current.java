@@ -34,7 +34,8 @@ public class Current implements Serializable {
     @SerializedName("wind_deg")
     @Expose
     private int wind_deg;
-
+    @SerializedName("weather")
+    @Expose
     private Weather[] weather;
 
     public long getDt() {

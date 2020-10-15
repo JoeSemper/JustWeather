@@ -487,4 +487,29 @@ public class MainActivity extends AppCompatActivity implements Constants {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
+
+
+    public TextView getTemperature() {
+        return temperature;
+    }
+
+    public TextView getPressure() {
+        return pressure;
+    }
+
+    public TextView getWindSpeed() {
+        return windSpeed;
+    }
+
+    public TextView getCurrentWeather() {
+        return currentWeather;
+    }
+
+    public TextView getMaxMinTemperature() {
+        return maxMinTemperature;
+    }
+
+    public TextView getSunriseSunset() {
+        return sunriseSunset;
+    }
 }
