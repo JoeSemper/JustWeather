@@ -40,7 +40,10 @@
         </service>
 
         <activity android:name=".ExtendedActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

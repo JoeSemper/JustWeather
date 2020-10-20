@@ -2,22 +2,26 @@ package com.joesemper.justweather.forecast;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.provider.SettingsSlicesContract;
 
 import com.joesemper.justweather.MainActivity;
 import com.joesemper.justweather.MapsActivity;
 import com.joesemper.justweather.R;
+import com.joesemper.justweather.SettingsActivity;
 import com.joesemper.justweather.forecast.openweather.Current;
 import com.joesemper.justweather.forecast.openweather.OpenWeather;
 
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.joesemper.justweather.SettingsActivity.IMPERIAL;
+import static com.joesemper.justweather.SettingsActivity.METRIC;
+import static com.joesemper.justweather.SettingsActivity.SETTINGS;
+import static com.joesemper.justweather.SettingsActivity.STANDARD;
+import static com.joesemper.justweather.SettingsActivity.UNITS;
 
 public class WeatherParser {
 
-    public static final String STANDARD = "STANDARD";
-    public static String METRIC = "METRIC";
-    public static String IMPERIAL = "IMPERIAL";
 
     private String tempUnits;
     private String windUnits;
@@ -35,22 +39,26 @@ public class WeatherParser {
     }
 
     private void loadPreferences() {
-        SharedPreferences sharedPreferences = mainActivity.getSharedPreferences("Settings", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = mainActivity.getSharedPreferences(SETTINGS, MODE_PRIVATE);
 
-        String currentUnits = sharedPreferences.getString("Units", STANDARD);
+        String currentUnits = sharedPreferences.getString(UNITS, METRIC);
 
-        if (currentUnits.equals(STANDARD)) {
-            tempUnits = mainActivity.getString(R.string.units_temp_kelvin);
-            windUnits = mainActivity.getString(R.string.units_wind_meter);
-        } else if (currentUnits.equals(METRIC)) {
-            tempUnits = mainActivity.getString(R.string.units_temp_celsius);
-            windUnits = mainActivity.getString(R.string.units_wind_meter);
-        } else if (currentUnits.equals(IMPERIAL)) {
-            tempUnits = mainActivity.getString(R.string.units_temp_far);
-            windUnits = mainActivity.getString(R.string.units_wind_miles);
+        switch (currentUnits) {
+            case METRIC:
+                tempUnits = mainActivity.getString(R.string.units_temp_celsius);
+                windUnits = mainActivity.getString(R.string.units_wind_meter);
+                pressureUnits = mainActivity.getString(R.string.units_pressure);
+                break;
+            case IMPERIAL:
+                tempUnits = mainActivity.getString(R.string.units_temp_far);
+                windUnits = mainActivity.getString(R.string.units_wind_miles);
+                pressureUnits = mainActivity.getString(R.string.units_pressure);
+                break;
+            default:
+                tempUnits = mainActivity.getString(R.string.units_temp_kelvin);
+                windUnits = mainActivity.getString(R.string.units_wind_meter);
+                pressureUnits = mainActivity.getString(R.string.units_pressure);
         }
-
-        pressureUnits = mainActivity.getString(R.string.units_pressure);
     }
 
     @SuppressLint("DefaultLocale")
@@ -102,6 +110,68 @@ public class WeatherParser {
         return (String.format("%.0f%s/%.0f%s",
                 openWeather.getDaily()[0].getTemp().getMin(), tempUnits,
                 openWeather.getDaily()[0].getTemp().getMax(), tempUnits));
+    }
+
+    public int getMainWeatherIcon(){
+        switch (openWeather.getCurrent().getWeather()[0].getIcon()) {
+            case "01d":
+                return R.drawable.sunny;
+            case "02d":
+                return R.drawable.partly_cloudy;
+            case "03d":
+                return R.drawable.clouds;
+            case "04d":
+                return R.drawable.clouds;
+            case "09d":
+                return R.drawable.heavy_rain;
+            case "10d":
+                return R.drawable.rain;
+            case "11d":
+                return R.drawable.storm;
+            case "13d":
+                return R.drawable.snow;
+            default:
+                return R.drawable.partly_cloudy;
+        }
+    }
+
+    public String getDayWeather(int i) {
+        return openWeather.getDaily()[i].getWeather()[0].getMain();
+    }
+
+    public int getDayWeatherIcon(int i) {
+        switch (openWeather.getDaily()[i].getWeather()[0].getIcon()) {
+            case "01d":
+                return R.drawable.sunny;
+            case "02d":
+                return R.drawable.partly_cloudy;
+            case "03d":
+                return R.drawable.clouds;
+            case "04d":
+                return R.drawable.clouds;
+            case "09d":
+                return R.drawable.heavy_rain;
+            case "10d":
+                return R.drawable.rain;
+            case "11d":
+                return R.drawable.storm;
+            case "13d":
+                return R.drawable.snow;
+            default:
+                return R.drawable.partly_cloudy;
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayMinMaxTemp(int i) {
+        return (String.format("%.0f%s/%.0f%s",
+                openWeather.getDaily()[i].getTemp().getMin(), tempUnits,
+                openWeather.getDaily()[i].getTemp().getMax(), tempUnits));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayWindSpeed(int i) {
+        return (String.format("%.1f %s", openWeather.getDaily()[i].getWind_speed(), windUnits));
     }
 }
 

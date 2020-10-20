@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.joesemper.justweather.forecast.WeatherParser;
+import com.joesemper.justweather.retrofit.RetrofitUpdater;
+
 import java.util.List;
 
 public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRecyclerViewAdapter.DaysViewHolder>  {
@@ -36,7 +39,7 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
 
     @Override
     public void onBindViewHolder(@NonNull DaysViewHolder holder, int position) {
-        holder.bind(days.get(position), onDayClickListener);
+        holder.bind(position, days.get(position), onDayClickListener);
     }
 
     @Override
@@ -55,15 +58,27 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
         private final TextView weather;
         private final View dayView;
 
+        private ImageView dayWeatherIcon;
+        private TextView dayWeather;
+        private TextView dayMinMaxTemp;
+        private TextView dayWind;
+
+
         public DaysViewHolder(@NonNull View itemView) {
             super(itemView);
             date = itemView.findViewById(R.id.date_text);
             weatherIcon = itemView.findViewById(R.id.weather_icon);
             weather = itemView.findViewById(R.id.day_temperature);
             dayView = itemView.findViewById(R.id.day_forecast);
+
+            dayWeatherIcon = itemView.findViewById(R.id.weather_icon);
+            dayWeather = itemView.findViewById(R.id.day_weather);
+            dayMinMaxTemp = itemView.findViewById(R.id.day_temperature);
+            dayWind = itemView.findViewById(R.id.day_wind_text);
         }
 
-        void bind (final String date, final OnDayClickListener onDayClickListener) {
+        void bind (final int position, final String date, final OnDayClickListener onDayClickListener) {
+            setWeather(position);
             this.date.setText(date);
             dayView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -76,9 +91,17 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
             });
         }
 
+        private void setWeather (int position){
+            WeatherParser weatherParser = RetrofitUpdater.getWeatherParser();
+            dayWeatherIcon.setImageResource(weatherParser.getDayWeatherIcon(position));
+            dayWeather.setText(weatherParser.getDayWeather(position));
+            dayMinMaxTemp.setText(weatherParser.getDayMinMaxTemp(position));
+            dayWind.setText(weatherParser.getDayWindSpeed(position));
+        }
+
         interface OnDayClickListener {
             void onClicked(String day);
         }
-
     }
+
 }

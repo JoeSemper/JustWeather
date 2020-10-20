@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -15,6 +16,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -26,10 +28,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.joesemper.justweather.SettingsActivity.CITY;
+import static com.joesemper.justweather.SettingsActivity.LAT;
+import static com.joesemper.justweather.SettingsActivity.LON;
+import static com.joesemper.justweather.SettingsActivity.SETTINGS;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -72,12 +80,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void savePreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("City", address.getText().toString());
-        editor.putFloat("lat", (float) currentLatLng.latitude);
-        editor.putFloat("lng", (float) currentLatLng.longitude);
-        editor.commit();
+        editor.putString(CITY, address.getText().toString());
+        editor.putFloat(LAT, (float) currentLatLng.latitude);
+        editor.putFloat(LON, (float) currentLatLng.longitude);
+        editor.apply();
     }
 
     private void initViews() {
@@ -193,8 +201,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng sydney = new LatLng(-34, 151);
-        currentMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Текущая позиция"));
+//        LatLng sydney = new LatLng(-34, 151);
+//        currentMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Текущая позиция"));
 //        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
@@ -240,5 +248,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
         markers.add(marker);
     }
+
+//    private void hideSoftKeyboard() {
+//        TextInputLayout textInputLayout = findViewById(R.id.textInputLayout);
+//        if (!textInputLayout.isFocused()) {
+//            return;
+//        }
+//        Activity activity = this;
+//        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+//        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+//    }
 
 }
