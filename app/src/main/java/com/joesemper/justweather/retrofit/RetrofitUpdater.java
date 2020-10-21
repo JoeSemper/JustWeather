@@ -1,7 +1,10 @@
 package com.joesemper.justweather.retrofit;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.joesemper.justweather.BuildConfig;
 import com.joesemper.justweather.MainActivity;
@@ -23,39 +26,28 @@ import static com.joesemper.justweather.SettingsActivity.UNITS;
 
 public class RetrofitUpdater  {
 
-    private MainActivity mainActivity;
-    private Location location;
+    private AppCompatActivity context;
 
-    private String currentUnits;
-
-    private OpenWeather openWeather;
     private static WeatherParser weatherParser;
 
     private WeatherRequest weatherRequest;
 
-    private static final String ID = BuildConfig.WEATHER_API_KEY;
+    public static final String UPDATE_FINISHED = "com.joesemper.justweather.updatefinished";
+    public static final String UPDATE_RESULT = "com.joesemper.justweather.updateresult";
+    public static final int UPDATE_RESULT_OK = 0;
 
 
     {
         initRetrofit();
     }
 
-    public RetrofitUpdater(MainActivity context) {
-        this.mainActivity = context;
+    public RetrofitUpdater(AppCompatActivity context) {
+        this.context = context;
     }
 
-
-    public void executeUpdate() {
-
-        Location location = mainActivity.getCurrentLocation();
-        float lat = location.lat;
-        float lon = location.lon;
-        String exclude = "minutely";
-        loadPreferences();
-
-        updateWeather(lat, lon, currentUnits, exclude, ID);
-
-
+    public void executeUpdate(Location location) {
+        UpdateData updateData = buildUpdateData(location);
+        updateWeather(updateData);
     }
 
     private void initRetrofit() {
@@ -66,31 +58,40 @@ public class RetrofitUpdater  {
         weatherRequest = retrofit.create(WeatherRequest.class);
     }
 
-    private void updateWeather(float lat, float lon, String units, String exclude, String keyApi) {
-        weatherRequest.loadWeather(lat, lon, units, exclude, keyApi)
+    private void updateWeather(UpdateData updateData) {
+        weatherRequest.loadWeather(
+                updateData.getLat(), updateData.getLon(),
+                updateData.getUnits(), updateData.getExclude(), updateData.getID())
                 .enqueue(new Callback<OpenWeather>() {
                     @Override
                     public void onResponse(Call<OpenWeather> call, Response<OpenWeather> response) {
                         if (response.body() != null) {
-                            openWeather = response.body();
-
-                            weatherParser = new WeatherParser(mainActivity, openWeather);
-                            mainActivity.displayWeather(weatherParser);
-                            mainActivity.initRecyclerView();
-                            Toast.makeText(mainActivity, "Success", Toast.LENGTH_SHORT).show();
-
+                            OpenWeather openWeather = response.body();
+                            weatherParser = new WeatherParser(context, openWeather);
+                            sendBroadcastUpdate();
+                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
                         }
                     }
                     @Override
                     public void onFailure(Call<OpenWeather> call, Throwable t) {
-                        Toast.makeText(mainActivity, "Fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void loadPreferences() {
-        SharedPreferences sharedPreferences = mainActivity.getSharedPreferences(SETTINGS, MODE_PRIVATE);
-        currentUnits = sharedPreferences.getString(UNITS, METRIC);
+    private UpdateData buildUpdateData(Location location) {
+        return new UpdateData.Builder(location).setUnits(getUnitsFromPreferences()).build();
+    }
+
+    private String getUnitsFromPreferences() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
+        return sharedPreferences.getString(UNITS, METRIC);
+    }
+
+    private void sendBroadcastUpdate() {
+        Intent broadcastIntent = new Intent(UPDATE_FINISHED);
+        broadcastIntent.putExtra(UPDATE_RESULT, UPDATE_RESULT_OK);
+        context.sendBroadcast(broadcastIntent);
     }
 
     public static WeatherParser getWeatherParser() {

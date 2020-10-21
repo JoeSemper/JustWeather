@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,6 +43,9 @@ import static com.joesemper.justweather.SettingsActivity.CITY;
 import static com.joesemper.justweather.SettingsActivity.LAT;
 import static com.joesemper.justweather.SettingsActivity.LON;
 import static com.joesemper.justweather.SettingsActivity.SETTINGS;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_FINISHED;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT_OK;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,9 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView city;
     private TextView temperature;
     private TextView pressure;
-    private ImageView pressureIcon;
     private TextView windSpeed;
-    private ImageView windIcon;
     private ImageView mainWeatherIcon;
     private TextView currentWeather;
     private TextView currentDate;
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
     private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
 
+    private BroadcastReceiver broadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         initViewsByID();
 
-//        initRecyclerView();
+        initRecyclerView();
 
         setButtonsClickListeners();
 
@@ -87,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
         setActualDates();
 
         initRetrofit();
+
+        initBroadcastReceiver();
 
         initGetToken();
 
@@ -97,18 +104,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        initReceiver();
+
         loadPreferences();
 
-        retrofitUpdater.executeUpdate();
+        updateWeather();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
+
 
     private void initViewsByID() {
         city = findViewById(R.id.location);
         temperature = findViewById(R.id.temperature);
         pressure = findViewById(R.id.pressure_text);
         windSpeed = findViewById(R.id.wind_text);
-        windIcon = findViewById(R.id.wind_icon);
-        pressureIcon = findViewById(R.id.pressure_icon);
         mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
         currentWeather = findViewById(R.id.current_weather);
         currentDate = findViewById(R.id.current_date);
@@ -152,6 +166,23 @@ public class MainActivity extends AppCompatActivity {
             addToFavorite.setImageResource(R.drawable.ic_star);
             searchHistoryDao.insertLocation(currentLocation);
         });
+
+    }
+
+    private void initReceiver(){
+        registerReceiver(broadcastReceiver, new IntentFilter(UPDATE_FINISHED));
+    }
+
+    private void initBroadcastReceiver() {
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getIntExtra(UPDATE_RESULT, -1) == UPDATE_RESULT_OK){
+                    displayWeather(RetrofitUpdater.getWeatherParser());
+                    recyclerViewAdapter.notifyDataSetChanged();
+                }
+            }
+        };
 
     }
 
@@ -238,7 +269,11 @@ public class MainActivity extends AppCompatActivity {
 //        return sb.toString();
 //    }
 
-    public void displayWeather(WeatherParser weatherParser){
+    private void updateWeather(){
+        retrofitUpdater.executeUpdate(currentLocation);
+    }
+
+    private void displayWeather(WeatherParser weatherParser){
         displayCurrentLocation();
         temperature.setText(weatherParser.getCurrentTemperature());
         pressure.setText(weatherParser.getCurrentPressure());
@@ -323,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         currentLocation = locations.get(i);
                         savePreferences();
-                        retrofitUpdater.executeUpdate();
+                        updateWeather();
                     }
                 });
         AlertDialog alertDialog = builder.create();
@@ -342,9 +377,5 @@ public class MainActivity extends AppCompatActivity {
         editor.putFloat(LAT, currentLocation.lat);
         editor.putFloat(LON, currentLocation.lon);
         editor.apply();
-    }
-
-    public Location getCurrentLocation() {
-        return currentLocation;
     }
 }

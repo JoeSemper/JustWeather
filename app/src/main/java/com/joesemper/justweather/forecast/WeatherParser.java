@@ -2,22 +2,19 @@ package com.joesemper.justweather.forecast;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.provider.SettingsSlicesContract;
 
-import com.joesemper.justweather.MainActivity;
-import com.joesemper.justweather.MapsActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.joesemper.justweather.R;
-import com.joesemper.justweather.SettingsActivity;
-import com.joesemper.justweather.forecast.openweather.Current;
 import com.joesemper.justweather.forecast.openweather.OpenWeather;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.joesemper.justweather.SettingsActivity.IMPERIAL;
 import static com.joesemper.justweather.SettingsActivity.METRIC;
 import static com.joesemper.justweather.SettingsActivity.SETTINGS;
-import static com.joesemper.justweather.SettingsActivity.STANDARD;
 import static com.joesemper.justweather.SettingsActivity.UNITS;
 
 public class WeatherParser {
@@ -28,36 +25,36 @@ public class WeatherParser {
     private String pressureUnits;
 
     private OpenWeather openWeather;
-    private MainActivity mainActivity;
+    private AppCompatActivity context;
 
     private Date date = new Date();
 
-    public WeatherParser(MainActivity context, OpenWeather openWeather) {
+    public WeatherParser(AppCompatActivity context, OpenWeather openWeather) {
         this.openWeather = openWeather;
-        this.mainActivity = context;
+        this.context = context;
         loadPreferences();
     }
 
     private void loadPreferences() {
-        SharedPreferences sharedPreferences = mainActivity.getSharedPreferences(SETTINGS, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
 
         String currentUnits = sharedPreferences.getString(UNITS, METRIC);
 
         switch (currentUnits) {
             case METRIC:
-                tempUnits = mainActivity.getString(R.string.units_temp_celsius);
-                windUnits = mainActivity.getString(R.string.units_wind_meter);
-                pressureUnits = mainActivity.getString(R.string.units_pressure);
+                tempUnits = context.getString(R.string.units_temp_celsius);
+                windUnits = context.getString(R.string.units_wind_meter);
+                pressureUnits = context.getString(R.string.units_pressure);
                 break;
             case IMPERIAL:
-                tempUnits = mainActivity.getString(R.string.units_temp_far);
-                windUnits = mainActivity.getString(R.string.units_wind_miles);
-                pressureUnits = mainActivity.getString(R.string.units_pressure);
+                tempUnits = context.getString(R.string.units_temp_far);
+                windUnits = context.getString(R.string.units_wind_miles);
+                pressureUnits = context.getString(R.string.units_pressure);
                 break;
             default:
-                tempUnits = mainActivity.getString(R.string.units_temp_kelvin);
-                windUnits = mainActivity.getString(R.string.units_wind_meter);
-                pressureUnits = mainActivity.getString(R.string.units_pressure);
+                tempUnits = context.getString(R.string.units_temp_kelvin);
+                windUnits = context.getString(R.string.units_wind_meter);
+                pressureUnits = context.getString(R.string.units_pressure);
         }
     }
 
