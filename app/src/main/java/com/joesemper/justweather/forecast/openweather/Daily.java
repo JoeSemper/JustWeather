@@ -18,12 +18,22 @@ public class Daily implements Serializable {
     @SerializedName("pressure")
     @Expose
     private int pressure;
+
     @SerializedName("wind_speed")
     @Expose
     private float wind_speed;
+
     @SerializedName("wind_deg")
     @Expose
     private float wind_deg;
+
+    @SerializedName("clouds")
+    @Expose
+    private int clouds;
+
+    @SerializedName("pop")
+    @Expose
+    private float pop;
 
     @SerializedName("weather")
     @Expose
@@ -75,5 +85,21 @@ public class Daily implements Serializable {
 
     public void setWeather(Weather[] weather) {
         this.weather = weather;
+    }
+
+    public int getClouds() {
+        return clouds;
+    }
+
+    public float getPop() {
+        return pop;
+    }
+
+    public void setClouds(int clouds) {
+        this.clouds = clouds;
+    }
+
+    public void setPop(int pop) {
+        this.pop = pop;
     }
 }

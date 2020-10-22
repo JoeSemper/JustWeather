@@ -227,7 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     address.post(new Runnable() {
                         @Override
                         public void run() {
-                            address.setText(addresses.get(0).getSubAdminArea());
+                            address.setText(addresses.get(0).getLocality());
                         }
                     });
 

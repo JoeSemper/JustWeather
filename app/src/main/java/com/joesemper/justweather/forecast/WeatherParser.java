@@ -109,7 +109,17 @@ public class WeatherParser {
                 openWeather.getDaily()[0].getTemp().getMax(), tempUnits));
     }
 
-    public int getMainWeatherIcon(){
+    @SuppressLint("DefaultLocale")
+    public String getCurrentHumidity() {
+        return (String.format("%d %s", openWeather.getCurrent().getHumidity(), "%"));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getCurrentCloudiness() {
+        return (String.format("%d %s", openWeather.getCurrent().getClouds(), "%"));
+    }
+
+    public int getMainWeatherIcon() {
         switch (openWeather.getCurrent().getWeather()[0].getIcon()) {
             case "01d":
                 return R.drawable.sunny;
@@ -166,35 +176,80 @@ public class WeatherParser {
                 openWeather.getDaily()[i].getTemp().getMax(), tempUnits));
     }
 
+
     @SuppressLint("DefaultLocale")
     public String getDayWindSpeed(int i) {
         return (String.format("%.1f %s", openWeather.getDaily()[i].getWind_speed(), windUnits));
     }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayPressure(int i) {
+        return (String.format("%d %s", openWeather.getDaily()[i].getPressure(), pressureUnits));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayPop(int i) {
+        return (String.format("%.1f %s", openWeather.getDaily()[i].getPop() * 10, "%"));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayCloudiness(int i) {
+        return (String.format("%d %s", openWeather.getDaily()[i].getClouds(), "%"));
+    }
+
+
+    @SuppressLint("DefaultLocale")
+    public String getMornTemp(int i) {
+        return (String.format("%.0f %s", openWeather.getDaily()[i].getTemp().getMorn(), tempUnits));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDayTemp(int i) {
+        return (String.format("%.0f %s", openWeather.getDaily()[i].getTemp().getDay(), tempUnits));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getEveTemp(int i) {
+        return (String.format("%.0f %s", openWeather.getDaily()[i].getTemp().getEve(), tempUnits));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getNightTemp(int i) {
+        return (String.format("%.0f %s", openWeather.getDaily()[i].getTemp().getNight(), tempUnits));
+    }
+
+
+    public int getHourlyWeatherIcon(int i) {
+        switch (openWeather.getHourly()[i].getWeather()[0].getIcon()) {
+            case "01d":
+                return R.drawable.sunny;
+            case "02d":
+                return R.drawable.partly_cloudy;
+            case "03d":
+                return R.drawable.clouds;
+            case "04d":
+                return R.drawable.clouds;
+            case "09d":
+                return R.drawable.heavy_rain;
+            case "10d":
+                return R.drawable.rain;
+            case "11d":
+                return R.drawable.storm;
+            case "13d":
+                return R.drawable.snow;
+            default:
+                return R.drawable.partly_cloudy;
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getHourlyTemp(int i) {
+        return (String.format("%.0f %s", openWeather.getHourly()[i].getTemp(), tempUnits));
+    }
+
+    public String getTime(int i) {
+        Date time = getDateByMs(openWeather.getHourly()[i].getDt());
+        return (String.format("%s", getHoursAndMinutes(time)));
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

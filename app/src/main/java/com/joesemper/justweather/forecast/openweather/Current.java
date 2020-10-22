@@ -34,6 +34,9 @@ public class Current implements Serializable {
     @SerializedName("wind_deg")
     @Expose
     private int wind_deg;
+    @SerializedName("clouds")
+    @Expose
+    private int clouds;
     @SerializedName("weather")
     @Expose
     private Weather[] weather;
@@ -116,5 +119,13 @@ public class Current implements Serializable {
 
     public void setWeather(Weather[] weather) {
         this.weather = weather;
+    }
+
+    public int getClouds() {
+        return clouds;
+    }
+
+    public void setClouds(int clouds) {
+        this.clouds = clouds;
     }
 }

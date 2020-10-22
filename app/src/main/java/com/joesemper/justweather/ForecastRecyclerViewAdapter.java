@@ -54,27 +54,40 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
     public static class DaysViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView date;
-        private final ImageView weatherIcon;
-        private final TextView weather;
         private final View dayView;
 
-        private ImageView dayWeatherIcon;
-        private TextView dayWeather;
-        private TextView dayMinMaxTemp;
-        private TextView dayWind;
+        private final TextView morTemperature;
+        private final TextView dayTemperature;
+        private final TextView eveTemperature;
+        private final TextView nigTemperature;
+
+        private final ImageView dayWeatherIcon;
+        private final TextView dayWeather;
+
+        private final TextView dayWind;
+        private final TextView dayPressure;
+        private final TextView dayPop;
+        private final TextView dayCloudiness;
 
 
         public DaysViewHolder(@NonNull View itemView) {
             super(itemView);
+
             date = itemView.findViewById(R.id.date_text);
-            weatherIcon = itemView.findViewById(R.id.weather_icon);
-            weather = itemView.findViewById(R.id.day_temperature);
             dayView = itemView.findViewById(R.id.day_forecast);
 
-            dayWeatherIcon = itemView.findViewById(R.id.weather_icon);
-            dayWeather = itemView.findViewById(R.id.day_weather);
-            dayMinMaxTemp = itemView.findViewById(R.id.day_temperature);
+            morTemperature = itemView.findViewById(R.id.day_morning_temp);
+            dayTemperature = itemView.findViewById(R.id.day_daytime_temp);
+            eveTemperature = itemView.findViewById(R.id.day_evening_temp);
+            nigTemperature = itemView.findViewById(R.id.day_night_temp);
+
+            dayWeatherIcon = itemView.findViewById(R.id.day_weather_icon);
+            dayWeather = itemView.findViewById(R.id.day_wether_text);
+
             dayWind = itemView.findViewById(R.id.day_wind_text);
+            dayPressure = itemView.findViewById(R.id.day_pressure_text);
+            dayPop = itemView.findViewById(R.id.day_pop_text);
+            dayCloudiness = itemView.findViewById(R.id.day_cloudiness_text);
         }
 
         void bind (final int position, final String date, final OnDayClickListener onDayClickListener) {
@@ -93,10 +106,22 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
 
         private void setWeather (int position){
             WeatherParser weatherParser = RetrofitUpdater.getWeatherParser();
+            if (weatherParser == null) {
+                return;
+            }
+
+            morTemperature.setText(weatherParser.getMornTemp(position));
+            dayTemperature.setText(weatherParser.getDayTemp(position));
+            eveTemperature.setText(weatherParser.getEveTemp(position));
+            nigTemperature.setText(weatherParser.getNightTemp(position));
+
             dayWeatherIcon.setImageResource(weatherParser.getDayWeatherIcon(position));
             dayWeather.setText(weatherParser.getDayWeather(position));
-            dayMinMaxTemp.setText(weatherParser.getDayMinMaxTemp(position));
+
             dayWind.setText(weatherParser.getDayWindSpeed(position));
+            dayPressure.setText(weatherParser.getDayPressure(position));
+            dayPop.setText(weatherParser.getDayPop(position));
+            dayCloudiness.setText(weatherParser.getDayCloudiness(position));
         }
 
         interface OnDayClickListener {

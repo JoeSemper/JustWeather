@@ -3,7 +3,6 @@ package com.joesemper.justweather;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,10 +59,25 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mainWeatherIcon;
     private TextView currentWeather;
     private TextView currentDate;
-    private TextView maxMinTemperature;
-    private TextView sunriseSunset;
+    private TextView currentHumidity;
+    private TextView currentCloudiness;
     private TextView feelsLikeValue;
     private ImageView addToFavorite;
+
+    private ImageView hourlyIcon01;
+    private ImageView hourlyIcon02;
+    private ImageView hourlyIcon03;
+    private ImageView hourlyIcon04;
+
+    private TextView hourlyTemp01;
+    private TextView hourlyTemp02;
+    private TextView hourlyTemp03;
+    private TextView hourlyTemp04;
+
+    private TextView hourlyTime01;
+    private TextView hourlyTime02;
+    private TextView hourlyTime03;
+    private TextView hourlyTime04;
 
 
     private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
@@ -126,10 +140,25 @@ public class MainActivity extends AppCompatActivity {
         mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
         currentWeather = findViewById(R.id.current_weather);
         currentDate = findViewById(R.id.current_date);
-        maxMinTemperature = findViewById(R.id.max_min_temperature);
-        sunriseSunset = findViewById(R.id.sunrise_sunset);
+        currentHumidity = findViewById(R.id.current_humidity);
+        currentCloudiness = findViewById(R.id.current_cloudniess);
         feelsLikeValue = findViewById(R.id.feels_like_value);
         addToFavorite = findViewById(R.id.add_to_favarite);
+
+        hourlyIcon01 = findViewById(R.id.weather_icon_00);
+        hourlyIcon02 = findViewById(R.id.weather_icon_06);
+        hourlyIcon03 = findViewById(R.id.weather_icon_12);
+        hourlyIcon04 = findViewById(R.id.weather_icon_18);
+
+        hourlyTemp01 = findViewById(R.id.hourly_temp_00);
+        hourlyTemp02 = findViewById(R.id.hourly_temp_06);
+        hourlyTemp03 = findViewById(R.id.hourly_temp_12);
+        hourlyTemp04 = findViewById(R.id.hourly_temp_18);
+
+        hourlyTime01 = findViewById(R.id.time_text_00);
+        hourlyTime02 = findViewById(R.id.time_text_06);
+        hourlyTime03 = findViewById(R.id.time_text_12);
+        hourlyTime04 = findViewById(R.id.time_text_18);
     }
 
     public void initRecyclerView() {
@@ -146,9 +175,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
-        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
-        recyclerView.addItemDecoration(itemDecoration);
+//        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
+//        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
+//        recyclerView.addItemDecoration(itemDecoration);
     }
 
     private void setButtonsClickListeners() {
@@ -197,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
         currentDate.setText(getDate(date));
 
         for (int i = 0; i <days.length ; i++) {
-            date.setTime(date.getTime() + oneDay);
             days[i] = getDate(date);
+            date.setTime(date.getTime() + oneDay);
         }
     }
 
@@ -260,15 +289,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-//    private String getHoursAndMinutes(Date d) {
-//        StringBuilder sb = new StringBuilder();
-//        String[] date = d.toString().split(" ", 4);
-//        String[] hours = date[3].split(":", 3);
-//        sb.append(hours[0] + ":" + hours[1]);
-//        return sb.toString();
-//    }
-
     private void updateWeather(){
         retrofitUpdater.executeUpdate(currentLocation);
     }
@@ -280,9 +300,24 @@ public class MainActivity extends AppCompatActivity {
         windSpeed.setText(weatherParser.getCurrentWindSpeed());
         currentWeather.setText(weatherParser.getCurrentWeather());
         feelsLikeValue.setText(weatherParser.getCurrentFeelsLike());
-        sunriseSunset.setText(weatherParser.getSunriseSunset());
-        maxMinTemperature.setText(weatherParser.getCurrentMinMaxTemp());
+        currentCloudiness.setText(weatherParser.getCurrentCloudiness());
+        currentHumidity.setText(weatherParser.getCurrentHumidity());
         mainWeatherIcon.setImageResource(weatherParser.getMainWeatherIcon());
+
+        hourlyIcon01.setImageResource(weatherParser.getHourlyWeatherIcon(6));
+        hourlyIcon02.setImageResource(weatherParser.getHourlyWeatherIcon(12));
+        hourlyIcon03.setImageResource(weatherParser.getHourlyWeatherIcon(18));
+        hourlyIcon04.setImageResource(weatherParser.getHourlyWeatherIcon(24));
+
+        hourlyTemp01.setText(weatherParser.getHourlyTemp(6));
+        hourlyTemp02.setText(weatherParser.getHourlyTemp(12));
+        hourlyTemp03.setText(weatherParser.getHourlyTemp(18));
+        hourlyTemp04.setText(weatherParser.getHourlyTemp(24));
+
+        hourlyTime01.setText(weatherParser.getTime(1));
+        hourlyTime02.setText(weatherParser.getTime(2));
+        hourlyTime03.setText(weatherParser.getTime(3));
+        hourlyTime04.setText(weatherParser.getTime(4));
     }
 
     private void displayCurrentLocation(){
