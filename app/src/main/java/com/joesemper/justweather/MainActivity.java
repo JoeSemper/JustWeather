@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -131,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(broadcastReceiver);
     }
 
-
     private void initViewsByID() {
         city = findViewById(R.id.location);
         temperature = findViewById(R.id.temperature);
@@ -175,30 +175,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
-//        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
-//        recyclerView.addItemDecoration(itemDecoration);
     }
 
     private void setButtonsClickListeners() {
-
-        addToFavorite.setOnClickListener(view -> {
-            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
-            List<Location> list = searchHistoryDao.getAllLocations();
-            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
-                if(list.get(i).city.equals(city.getText().toString())){
-                    addToFavorite.setImageResource(R.drawable.ic_star_border);
-                    searchHistoryDao.deleteLocation(list.get(i));
-                    return;
-                }
-            }
-            addToFavorite.setImageResource(R.drawable.ic_star);
-            searchHistoryDao.insertLocation(currentLocation);
-        });
-
+        addToFavorite.setOnClickListener(new OnAddToFavoriteClickListener());
     }
 
-    private void initReceiver(){
+    private void initReceiver() {
         registerReceiver(broadcastReceiver, new IntentFilter(UPDATE_FINISHED));
     }
 
@@ -206,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getIntExtra(UPDATE_RESULT, -1) == UPDATE_RESULT_OK){
+                if (intent.getIntExtra(UPDATE_RESULT, -1) == UPDATE_RESULT_OK) {
                     displayWeather(RetrofitUpdater.getWeatherParser());
                     recyclerViewAdapter.notifyDataSetChanged();
                 }
@@ -225,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
         currentDate.setText(getDate(date));
 
-        for (int i = 0; i <days.length ; i++) {
+        for (int i = 0; i < days.length; i++) {
             days[i] = getDate(date);
             date.setTime(date.getTime() + oneDay);
         }
@@ -262,10 +245,10 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void initNotificationChannel(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    private void initNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager =
-                    (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel mChannel = new NotificationChannel("2", "name", importance);
             notificationManager.createNotificationChannel(mChannel);
@@ -289,11 +272,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void updateWeather(){
+    private void updateWeather() {
         retrofitUpdater.executeUpdate(currentLocation);
     }
 
-    private void displayWeather(WeatherParser weatherParser){
+    private void displayWeather(WeatherParser weatherParser) {
         displayCurrentLocation();
         temperature.setText(weatherParser.getCurrentTemperature());
         pressure.setText(weatherParser.getCurrentPressure());
@@ -314,28 +297,35 @@ public class MainActivity extends AppCompatActivity {
         hourlyTemp03.setText(weatherParser.getHourlyTemp(18));
         hourlyTemp04.setText(weatherParser.getHourlyTemp(24));
 
-        hourlyTime01.setText(weatherParser.getTime(1));
-        hourlyTime02.setText(weatherParser.getTime(2));
-        hourlyTime03.setText(weatherParser.getTime(3));
-        hourlyTime04.setText(weatherParser.getTime(4));
+        hourlyTime01.setText(weatherParser.getTime(6));
+        hourlyTime02.setText(weatherParser.getTime(12));
+        hourlyTime03.setText(weatherParser.getTime(18));
+        hourlyTime04.setText(weatherParser.getTime(24));
     }
 
-    private void displayCurrentLocation(){
+    private void displayCurrentLocation() {
         city.setText(currentLocation.city);
-        checkFavorite();
+        displayFavorite();
     }
 
-    private void checkFavorite() {
+    private void displayFavorite(){
+        if (checkFavorite()){
+            addToFavorite.setImageResource(R.drawable.ic_star);
+        } else {
+            addToFavorite.setImageResource(R.drawable.ic_star_border);
+        }
+
+    }
+
+    private boolean checkFavorite() {
         SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
         List<Location> list = searchHistoryDao.getAllLocations();
         for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
             if (list.get(i).city.equals(currentLocation.city)) {
-                addToFavorite.setImageResource(R.drawable.ic_star);
-                return;
-            } else {
-                addToFavorite.setImageResource(R.drawable.ic_star_border);
+                return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -371,14 +361,14 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void onHistoryClicked(){
+    private void onHistoryClicked() {
         final String[] items;
-        List<Location>  locations = searchHistoryDao.getAllLocations();
+        List<Location> locations = searchHistoryDao.getAllLocations();
         if (locations.isEmpty()) {
             items = new String[]{"No favorite locations"};
         } else {
             items = new String[(int) searchHistoryDao.getCountLocations()];
-            for (int i = 0; i <searchHistoryDao.getCountLocations(); i++) {
+            for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
                 items[i] = locations.get(i).city;
             }
         }
@@ -388,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 .setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if (items[i].equals("No favorite locations")){
+                        if (items[i].equals("No favorite locations")) {
                             return;
                         }
                         currentLocation = locations.get(i);
@@ -400,12 +390,12 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void onAddLocationClicked(){
+    private void onAddLocationClicked() {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
 
-    private void savePreferences(){
+    private void savePreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(CITY, currentLocation.city);
@@ -413,4 +403,19 @@ public class MainActivity extends AppCompatActivity {
         editor.putFloat(LON, currentLocation.lon);
         editor.apply();
     }
+
+    private class OnAddToFavoriteClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+            if (checkFavorite()) {
+                addToFavorite.setImageResource(R.drawable.ic_star_border);
+                searchHistoryDao.deleteLocation(currentLocation);
+            } else {
+                addToFavorite.setImageResource(R.drawable.ic_star);
+                searchHistoryDao.insertLocation(currentLocation);
+            }
+        }
+    }
+
 }

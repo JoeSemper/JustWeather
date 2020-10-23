@@ -2,6 +2,7 @@ package com.joesemper.justweather.forecast;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,6 +10,7 @@ import com.joesemper.justweather.R;
 import com.joesemper.justweather.forecast.openweather.OpenWeather;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -27,7 +29,7 @@ public class WeatherParser {
     private OpenWeather openWeather;
     private AppCompatActivity context;
 
-    private Date date = new Date();
+//    private Date date = new Date();
 
     public WeatherParser(AppCompatActivity context, OpenWeather openWeather) {
         this.openWeather = openWeather;
@@ -93,13 +95,12 @@ public class WeatherParser {
         StringBuilder sb = new StringBuilder();
         String[] date = d.toString().split(" ", 4);
         String[] hours = date[3].split(":", 3);
-        sb.append(hours[0]).append(":").append(hours[1]);
+        sb.append(hours[0]).append(":").append("00");
         return sb.toString();
     }
 
     private Date getDateByMs(long ms) {
-        date.setTime(ms);
-        return date;
+        return new Date(ms);
     }
 
     @SuppressLint("DefaultLocale")
@@ -248,8 +249,9 @@ public class WeatherParser {
     }
 
     public String getTime(int i) {
-        Date time = getDateByMs(openWeather.getHourly()[i].getDt());
+        long hours = 3600000 * i;
+        Date time = new Date();
+        time.setTime(time.getTime() + hours);
         return (String.format("%s", getHoursAndMinutes(time)));
     }
-
 }

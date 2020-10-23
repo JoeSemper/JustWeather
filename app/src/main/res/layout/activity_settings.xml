@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Platform.MaterialComponents"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,11 +14,11 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            app:title="@string/settings"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="@string/settings" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -62,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 app:layout_constraintStart_toStartOf="@+id/units4"
-                app:layout_constraintTop_toBottomOf="@+id/units4" />
+                app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
             <TextView
                 android:id="@+id/units"
@@ -76,152 +77,67 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/current_units_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/icons"
+                android:text="Units"
+                app:layout_constraintEnd_toEndOf="@+id/divider8"
+                app:layout_constraintStart_toStartOf="@+id/divider8"
+                app:layout_constraintTop_toBottomOf="@+id/divider8"
+                app:rippleColor="@color/colorAccent" />
+
             <TextView
                 android:id="@+id/units4"
                 style="@style/text_style_simple_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="48dp"
                 android:padding="4dp"
                 android:text="Account"
                 app:layout_constraintStart_toStartOf="@+id/units"
-                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+                app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
             <TextView
                 android:id="@+id/units2"
                 style="@style/text_style_simple_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="48dp"
                 android:padding="4dp"
                 android:text="Location"
                 app:layout_constraintStart_toStartOf="@+id/units"
-                app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-            <TableRow
-                android:id="@+id/temperaure_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:padding="4dp"
-                app:layout_constraintStart_toStartOf="@+id/textView"
-                app:layout_constraintTop_toBottomOf="@+id/textView">
-
-                <TextView
-                    android:id="@+id/temp_units_settings"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Temperature units:" />
-
-                <TextView
-                    android:id="@+id/temp_units"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="°C" />
-
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/pressure_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:padding="4dp"
-                app:layout_constraintStart_toStartOf="@+id/temperaure_row"
-                app:layout_constraintTop_toBottomOf="@+id/temperaure_row">
-
-                <TextView
-                    android:id="@+id/pressure_units_settings"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Atmosphere pressure units:" />
-
-                <TextView
-                    android:id="@+id/pressure_units"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="mm Hg" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/wind_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:padding="4dp"
-                app:layout_constraintStart_toStartOf="@+id/pressure_row"
-                app:layout_constraintTop_toBottomOf="@+id/pressure_row">
-
-                <TextView
-                    android:id="@+id/wind_units_settings"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Wind speed units:" />
-
-                <TextView
-                    android:id="@+id/wind_units"
-                    style="@style/text_style_simple"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="m/s" />
-
-            </TableRow>
+                app:layout_constraintTop_toBottomOf="@+id/imageView6" />
 
             <View
                 android:id="@+id/divider2"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
                 android:background="@android:drawable/title_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/wind_row" />
+                app:layout_constraintTop_toBottomOf="@+id/units2" />
 
             <View
                 android:id="@+id/divider3"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
                 android:background="@android:drawable/title_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/switch_auto_location" />
-
-            <Spinner
-                android:id="@+id/spinner_unit_system"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:entries="@array/choose_unit_system"
-                android:theme="@style/AppTheme"
-                app:layout_constraintBottom_toBottomOf="@+id/textView"
-                app:layout_constraintStart_toEndOf="@+id/textView"
-                app:layout_constraintTop_toTopOf="@+id/textView" />
-
-            <TextView
-                android:id="@+id/textView"
-                style="@style/text_style_simple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:padding="4dp"
-                android:text="Current System:"
-                app:layout_constraintStart_toStartOf="@+id/units"
-                app:layout_constraintTop_toBottomOf="@+id/units" />
+                app:layout_constraintTop_toBottomOf="@+id/units4" />
 
             <Switch
                 android:id="@+id/switch_auto_location"
@@ -242,8 +158,141 @@
                 android:padding="4dp"
                 android:tint="#000000"
                 app:layout_constraintStart_toStartOf="@+id/units2"
-                app:layout_constraintTop_toBottomOf="@+id/units2"
+                app:layout_constraintTop_toBottomOf="@+id/divider2"
                 app:srcCompat="@drawable/ic_baseline_gps_fixed_24" />
+
+            <View
+                android:id="@+id/divider8"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:background="@android:drawable/title_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/units" />
+
+            <TextView
+                android:id="@+id/textView12"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Temperature"
+                app:layout_constraintEnd_toStartOf="@+id/divider9"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/current_units_button" />
+
+            <TextView
+                android:id="@+id/textView13"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pressure"
+                app:layout_constraintEnd_toStartOf="@+id/divider10"
+                app:layout_constraintStart_toEndOf="@+id/divider9"
+                app:layout_constraintTop_toTopOf="@+id/textView12" />
+
+            <TextView
+                android:id="@+id/textView14"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wind Speed"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/divider10"
+                app:layout_constraintTop_toTopOf="@+id/textView12" />
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView12"
+                app:layout_constraintHorizontal_bias="0.27"
+                app:layout_constraintStart_toStartOf="@+id/textView12"
+                app:layout_constraintTop_toBottomOf="@+id/textView12"
+                app:srcCompat="@drawable/thermometer" />
+
+            <ImageView
+                android:id="@+id/imageView7"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView13"
+                app:layout_constraintHorizontal_bias="0.04"
+                app:layout_constraintStart_toStartOf="@+id/textView13"
+                app:layout_constraintTop_toBottomOf="@+id/textView13"
+                app:srcCompat="@drawable/pressure" />
+
+            <ImageView
+                android:id="@+id/imageView8"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView14"
+                app:layout_constraintHorizontal_bias="0.2"
+                app:layout_constraintStart_toStartOf="@+id/textView14"
+                app:layout_constraintTop_toBottomOf="@+id/textView14"
+                app:srcCompat="@drawable/wind" />
+
+            <View
+                android:id="@+id/divider9"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:background="@android:drawable/title_bar"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.35"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textView12"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <View
+                android:id="@+id/divider10"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:background="@android:drawable/title_bar"
+                app:layout_constraintBottom_toBottomOf="@+id/divider9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.65"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textView13"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/current_temp_units"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="°C"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView6"
+                app:layout_constraintStart_toEndOf="@+id/imageView6"
+                app:layout_constraintTop_toTopOf="@+id/imageView6" />
+
+            <TextView
+                android:id="@+id/current_pressure_units"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="hPa"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView7"
+                app:layout_constraintStart_toEndOf="@+id/imageView7"
+                app:layout_constraintTop_toTopOf="@+id/imageView7" />
+
+            <TextView
+                android:id="@+id/current_wind_units"
+                style="@style/text_style_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="m/s"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+                app:layout_constraintStart_toEndOf="@+id/imageView8"
+                app:layout_constraintTop_toTopOf="@+id/imageView8" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
