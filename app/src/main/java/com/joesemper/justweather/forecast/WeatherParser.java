@@ -190,7 +190,7 @@ public class WeatherParser {
 
     @SuppressLint("DefaultLocale")
     public String getDayPop(int i) {
-        return (String.format("%.1f %s", openWeather.getDaily()[i].getPop() * 10, "%"));
+        return (String.format("%.0f %s", openWeather.getDaily()[i].getPop() * 100, "%"));
     }
 
     @SuppressLint("DefaultLocale")

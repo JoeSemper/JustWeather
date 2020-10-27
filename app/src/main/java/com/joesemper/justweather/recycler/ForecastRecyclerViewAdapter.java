@@ -1,4 +1,4 @@
-package com.joesemper.justweather;
+package com.joesemper.justweather.recycler;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.joesemper.justweather.R;
 import com.joesemper.justweather.forecast.WeatherParser;
+import com.joesemper.justweather.interfaces.WeatherUpdater;
 import com.joesemper.justweather.retrofit.RetrofitUpdater;
 
 import java.util.List;
@@ -105,7 +107,8 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
         }
 
         private void setWeather (int position){
-            WeatherParser weatherParser = RetrofitUpdater.getWeatherParser();
+            WeatherUpdater weatherUpdater = RetrofitUpdater.getInstance();
+            WeatherParser weatherParser = weatherUpdater.getWeatherParser();
             if (weatherParser == null) {
                 return;
             }
@@ -124,7 +127,7 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
             dayCloudiness.setText(weatherParser.getDayCloudiness(position));
         }
 
-        interface OnDayClickListener {
+       public interface OnDayClickListener {
             void onClicked(String day);
         }
     }

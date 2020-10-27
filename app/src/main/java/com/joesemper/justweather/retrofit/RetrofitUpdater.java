@@ -12,6 +12,7 @@ import com.joesemper.justweather.database.Location;
 import com.joesemper.justweather.forecast.WeatherParser;
 import com.joesemper.justweather.forecast.openweather.OpenWeather;
 import com.joesemper.justweather.interfaces.WeatherRequest;
+import com.joesemper.justweather.interfaces.WeatherUpdater;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -24,13 +25,15 @@ import static com.joesemper.justweather.SettingsActivity.METRIC;
 import static com.joesemper.justweather.SettingsActivity.SETTINGS;
 import static com.joesemper.justweather.SettingsActivity.UNITS;
 
-public class RetrofitUpdater  {
+public class RetrofitUpdater implements WeatherUpdater {
 
     private AppCompatActivity context;
 
     private static WeatherParser weatherParser;
 
     private WeatherRequest weatherRequest;
+
+    private static WeatherUpdater weatherUpdater;
 
     public static final String UPDATE_FINISHED = "com.joesemper.justweather.updatefinished";
     public static final String UPDATE_RESULT = "com.joesemper.justweather.updateresult";
@@ -41,11 +44,19 @@ public class RetrofitUpdater  {
         initRetrofit();
     }
 
-    public RetrofitUpdater(AppCompatActivity context) {
-        this.context = context;
+    private RetrofitUpdater(){
     }
 
-    public void executeUpdate(Location location) {
+    public static WeatherUpdater getInstance(){
+        if (weatherUpdater == null){
+            return new RetrofitUpdater();
+        }
+        return weatherUpdater;
+    }
+
+    @Override
+    public void executeUpdate(AppCompatActivity context, Location location) {
+        this.context = context;
         UpdateData updateData = buildUpdateData(location);
         updateWeather(updateData);
     }
@@ -69,12 +80,12 @@ public class RetrofitUpdater  {
                             OpenWeather openWeather = response.body();
                             weatherParser = new WeatherParser(context, openWeather);
                             sendBroadcastUpdate();
-                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
                         }
                     }
                     @Override
                     public void onFailure(Call<OpenWeather> call, Throwable t) {
-                        Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Fail ot update weather", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -94,7 +105,8 @@ public class RetrofitUpdater  {
         context.sendBroadcast(broadcastIntent);
     }
 
-    public static WeatherParser getWeatherParser() {
+    @Override
+    public WeatherParser getWeatherParser() {
         return weatherParser;
     }
 }

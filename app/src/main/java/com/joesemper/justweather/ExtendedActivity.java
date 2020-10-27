@@ -18,12 +18,12 @@ public class ExtendedActivity extends AppCompatActivity {
         TextView currentDay = findViewById(R.id.extended_day_header);
         currentDay.setText(day);
 
-        ImageButton backButton = findViewById(R.id.extended_back_button);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+//        ImageButton backButton = findViewById(R.id.extended_back_button);
+//        backButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                finish();
+//            }
+//        });
     }
 }
