@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -37,6 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String STANDARD = "Standard";
     public static final String METRIC = "Metric";
     public static final String IMPERIAL = "Imperial";
+    public static final String AUTO_LOCATION = "AUTO_LOCATION";
 
     private static final int RC_SIGN_IN = 40404;
     private static final String TAG = "GoogleAuth";
@@ -46,6 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
     private com.google.android.gms.common.SignInButton buttonSignIn;
     private MaterialButton buttonSingOut;
     private TextView email;
+    private Switch autoLocationSwitch;
 
     private String currentUnits;
 
@@ -81,6 +85,7 @@ public class SettingsActivity extends AppCompatActivity {
         windUnits = findViewById(R.id.current_wind_units);
         buttonCurrentUnitSystem = findViewById(R.id.current_units_button);
         buttonSignIn = findViewById(R.id.sign_in_button);
+        autoLocationSwitch = findViewById(R.id.switch_auto_location);
     }
 
     private void initToolbar() {
@@ -94,6 +99,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void loadPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
         currentUnits = sharedPreferences.getString(UNITS, METRIC);
+        autoLocationSwitch.setChecked(sharedPreferences.getBoolean(AUTO_LOCATION, false));
         setUnits();
     }
 
@@ -101,6 +107,7 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(UNITS, currentUnits);
+        editor.putBoolean(AUTO_LOCATION, autoLocationSwitch.isChecked());
         editor.apply();
     }
 
@@ -115,6 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
         buttonCurrentUnitSystem.setOnClickListener(new OnUnitSystemClickListener());
         buttonSignIn.setOnClickListener(new OnSignInClickListener());
         buttonSingOut.setOnClickListener(new OnSignOutClickListener());
+        autoLocationSwitch.setOnCheckedChangeListener(new OnWitchChangeListener());
     }
 
     private void checkSignIn() {
@@ -216,6 +224,13 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             signIn();
+        }
+    }
+
+    private class OnWitchChangeListener implements CompoundButton.OnCheckedChangeListener {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            savePreferences();
         }
     }
 

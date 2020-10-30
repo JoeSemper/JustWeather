@@ -80,5 +80,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="location_extra">(location)</string>
+    <string name="no_locality">No locality here</string>
+    <string name="find_on_map">Find on map</string>
+    <string name="add_location">Add location</string>
+    <string name="list_view">List view</string>
 
 </resources>

@@ -6,4 +6,19 @@
         android:icon="@drawable/ic_baseline_search_24"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_map"
+        android:icon="@drawable/ic_baseline_map_24"
+        android:orderInCategory="10"
+        android:title="@string/find_on_map"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_list"
+        android:icon="@drawable/ic_baseline_format_list_bulleted_24"
+        android:orderInCategory="10"
+        android:title="@string/list_view"
+        app:showAsAction="ifRoom" />
 </menu>
