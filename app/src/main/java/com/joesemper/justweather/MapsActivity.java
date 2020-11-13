@@ -1,10 +1,23 @@
 package com.joesemper.justweather;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.ListFragment;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import android.Manifest;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -13,10 +26,19 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,23 +48,28 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.joesemper.justweather.services.SearchWorker;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import static com.joesemper.justweather.SettingsActivity.CITY;
+import static com.joesemper.justweather.SettingsActivity.LAT;
+import static com.joesemper.justweather.SettingsActivity.LON;
+import static com.joesemper.justweather.SettingsActivity.SETTINGS;
 
-    private EditText address;
-    private Button applyButton;
-
-    private LatLng currentLatLng;
-
-    private Marker currentMarker;
+public class MapsActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 10;
 
+    private int myResult;
+
     private GoogleMap mMap;
+
+    private SearchView searchView;
 
 
     @Override
@@ -50,89 +77,134 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+//        requestPermissions();
 
-        initViews();
+        initToolbar();
 
-        requestPermissions();
-
-        setOnApplyClickListener();
+        initFragment(new MapFragment());
     }
 
-    private void setOnApplyClickListener(){
-        applyButton.setOnClickListener(new View.OnClickListener() {
+    private void initToolbar() {
+        Toolbar toolbar = findViewById(R.id.map_toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> finish());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
+
+        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View view) {
-                savePreferences();
-                finish();
+            public boolean onQueryTextSubmit(String query) {
+                Data input = new Data.Builder().putString(CITY, query).build();
+                OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest
+                        .Builder(SearchWorker.class)
+                        .setInputData(input)
+                        .build();
+                WorkManager workManager = WorkManager.getInstance(MapsActivity.this);
+                workManager.enqueue(oneTimeWorkRequest);
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
+
+        return true;
     }
 
-    private void savePreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("City", address.getText().toString());
-        editor.putFloat("lat", (float) currentLatLng.latitude);
-        editor.putFloat("lng", (float) currentLatLng.longitude);
-        editor.commit();
-    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        Toolbar toolbar = findViewById(R.id.map_toolbar);
+        switch (id) {
+            case R.id.search:
+                SearchView searchView = findViewById(R.id.search);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    searchView.setFocusedByDefault(true);
+                }
+                return true;
+            case R.id.action_map:
+                initFragment(new MapFragment());
+                onPrepareOptionsMenu(toolbar.getMenu());
+                return true;
+            case R.id.action_list:
+                initFragment(new SearchListFragment());
+                onPrepareOptionsMenu(toolbar.getMenu());
+                return true;
 
-    private void initViews() {
-        address = findViewById(R.id.search_address);
-        applyButton = findViewById(R.id.button_apply_search);
-        applyButton.setClickable(false);
-        initSearchByAddress();
-    }
-
-    private void initSearchByAddress() {
-        findViewById(R.id.buttonSearch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Geocoder geocoder = new Geocoder(MapsActivity.this);
-                final String searchText = address.getText().toString();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
-                            if (addresses.size() > 0) {
-                                final LatLng location = new LatLng(addresses.get(0).getLatitude(),
-                                        addresses.get(0).getLongitude());
-                                currentLatLng = location;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mMap.clear();
-                                        mMap.addMarker(new MarkerOptions()
-                                                .position(location)
-                                                .title(searchText)
-                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
-                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
-                                        applyButton.setEnabled(true);
-                                    }
-                                });
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-            }
-        });
-    }
-
-
-        private void requestPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            requestLocation();
-        } else {
-            requestLocationPermissions();
         }
+        return super.onOptionsItemSelected(item);
     }
+
+    private synchronized void initFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_frame, fragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+//        if(menu.getItem(1).isVisible()){
+//            menu.getItem(1).setVisible(false);
+//            menu.getItem(2).setVisible(true);
+//        } else {
+//            menu.getItem(1).setVisible(true);
+//            menu.getItem(2).setVisible(false);
+//        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+
+
+
+
+//    private void initSearchByAddress() {
+//        findViewById(R.id.buttonSearch).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final Geocoder geocoder = new Geocoder(MapsActivity.this);
+//                final String searchText = address.getText().toString();
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
+//                            if (addresses.size() > 0) {
+//                                final LatLng location = new LatLng(addresses.get(0).getLatitude(),
+//                                        addresses.get(0).getLongitude());
+//                                currentLatLng = location;
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        mMap.clear();
+//                                        mMap.addMarker(new MarkerOptions()
+//                                                .position(location)
+//                                                .title(searchText)
+//                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+//                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
+//                                        applyButton.setEnabled(true);
+//                                    }
+//                                });
+//                            }
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }).start();
+//            }
+//        });
+//    }
+
 
     private void requestLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -157,88 +229,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String accuracy = Float.toString(location.getAccuracy());   // Точность
 
                     LatLng currentPosition = new LatLng(lat, lng);
-                    currentMarker.setPosition(currentPosition);
+//                    currentMarker.setPosition(currentPosition);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 12));
                 }
             });
         }
     }
 
-    private void requestLocationPermissions() {
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                    },
-                    PERMISSION_REQUEST_CODE);
-        }
-    }
+//    private void hideSoftKeyboard() {
+//        TextInputLayout textInputLayout = findViewById(R.id.textInputLayout);
+//        if (!textInputLayout.isFocused()) {
+//            return;
+//        }
+//        Activity activity = this;
+//        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+//        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+//    }
 
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length == 2 &&
-                    (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                requestLocation();
-            }
-        }
-    }
-
-
-    private List<Marker> markers = new ArrayList<Marker>();
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        LatLng sydney = new LatLng(-34, 151);
-        currentMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Текущая позиция"));
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                getAddress(latLng);
-                addMarker(latLng);
-                applyButton.setEnabled(true);
-            }
-        });
-
-    }
-
-    private void getAddress(final LatLng location) {
-        final Geocoder geocoder = new Geocoder(this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final List<Address> addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1);
-                    address.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            address.setText(addresses.get(0).getSubAdminArea());
-                        }
-                    });
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    private void addMarker(LatLng location){
-        currentLatLng = location;
-        mMap.clear();
-        String title = Integer.toString(markers.size());
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(location)
-                .title(title)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
-        markers.add(marker);
-    }
 
 }

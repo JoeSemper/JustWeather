@@ -1,14 +1,11 @@
 package com.joesemper.justweather;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -23,98 +20,121 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.joesemper.justweather.forecast.MainForecast;
-import com.joesemper.justweather.interfaces.Constants;
-import com.joesemper.justweather.interfaces.ForecastUpdater;
-import com.joesemper.justweather.interfaces.WeatherRequest;
-import com.joesemper.justweather.maintenance.App;
-import com.joesemper.justweather.maintenance.Location;
-import com.joesemper.justweather.maintenance.SearchHistoryDao;
-import com.joesemper.justweather.maintenance.Settings;
-import com.joesemper.justweather.openweather.OpenWeather;
+import com.joesemper.justweather.forecast.WeatherParser;
+import com.joesemper.justweather.database.App;
+import com.joesemper.justweather.database.Location;
+import com.joesemper.justweather.database.SearchHistoryDao;
+import com.joesemper.justweather.interfaces.WeatherUpdater;
+import com.joesemper.justweather.recycler.ForecastRecyclerViewAdapter;
+import com.joesemper.justweather.retrofit.RetrofitUpdater;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import static com.joesemper.justweather.SettingsActivity.CITY;
+import static com.joesemper.justweather.SettingsActivity.LAT;
+import static com.joesemper.justweather.SettingsActivity.LON;
+import static com.joesemper.justweather.SettingsActivity.SETTINGS;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_FINISHED;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT;
+import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT_OK;
 
 
-public class MainActivity extends AppCompatActivity implements Constants {
+public class MainActivity extends AppCompatActivity {
 
-    private Date date = new Date();
-    private String[] days = new String[7];
-
-    private TextView city;
-    private TextView temperature;
-    private TextView pressure;
-    private ImageView pressureIcon;
-    private TextView windSpeed;
-    private ImageView windIcon;
-    private ImageView mainWeatherIcon;
-    private TextView currentWeather;
-    private TextView currentDate;
-    private TextView maxMinTemperature;
-    private TextView sunriseSunset;
-    private TextView feelsLikeValue;
-
-    private String tempUnits;
-    private String pressureUnits;
-    private String windUnits;
-
-    private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
-
-    private MainForecast mainForecast;
-    private OpenWeather openWeather;
-    private WeatherRequest weatherRequest;
-    private static final String ID = BuildConfig.WEATHER_API_KEY;
-
-    private Settings settings = Settings.getInstance();
-
+    private UiUpdater uiUpdater;
+    private ImageView addToFavorite;
+    private Location currentLocation;
+    private WeatherUpdater weatherUpdater;
+    private BroadcastReceiver broadcastReceiver;
     private SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+    private final ForecastRecyclerViewAdapter recyclerViewAdapter = new ForecastRecyclerViewAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initViewsByID();
-
+        initUI();
         initRecyclerView();
-
         setButtonsClickListeners();
-
-        setActualDates();
-
         initToolbar();
-
-        initGetToken();
-
-        initNotificationChannel();
-
         initRetrofit();
+        initBroadcastReceiver();
+        initGetToken();
+        initNotificationChannel();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        regReceiver();
+        loadPreferences();
+        updateWeather();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    private void initUI() {
+        uiUpdater = new UiUpdater();
+        uiUpdater.initUi();
+
+        addToFavorite = findViewById(R.id.add_to_favorite);
+    }
+
+    public void initRecyclerView() {
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
+        recyclerView.setLayoutManager(new LinearLayoutManager(
+                this, RecyclerView.VERTICAL, false));
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerViewAdapter.setDays(Arrays.asList(uiUpdater.getActualDates()));
+    }
+
+    private void setButtonsClickListeners() {
+        addToFavorite.setOnClickListener(new OnAddToFavoriteClickListener());
+        recyclerViewAdapter.setOnDayClickListener(new OnDayClickListener());
+    }
+
+    private void initBroadcastReceiver() {
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getIntExtra(UPDATE_RESULT, -1) == UPDATE_RESULT_OK) {
+                    uiUpdater.updateUI();
+                }
+            }
+        };
+    }
+
+    private void regReceiver() {
+        registerReceiver(broadcastReceiver, new IntentFilter(UPDATE_FINISHED));
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
+    private void initRetrofit() {
+        weatherUpdater = RetrofitUpdater.getInstance();
     }
 
     private void initGetToken() {
-
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override
@@ -123,206 +143,60 @@ public class MainActivity extends AppCompatActivity implements Constants {
                             Log.w("PushMessage", "getInstanceId failed", task.getException());
                             return;
                         }
-
                         String token = task.getResult().getToken();
                         Log.d("PushMessage", "Token " + token);
                     }
                 });
     }
 
-
-    private void loadPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
-        tempUnits = sharedPreferences.getString("Temp", "°C");
-        pressureUnits = sharedPreferences.getString("Pres", "mm Hg");
-        windUnits  = sharedPreferences.getString("Wind", "m/s");
-        city.setText(sharedPreferences.getString("City", "Moscow"));
-    }
-
-    private void initRetrofit() {
-        Retrofit retrofit;
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/")
-                .addConverterFactory(GsonConverterFactory.create()).build();
-        weatherRequest = retrofit.create(WeatherRequest.class);
-    }
-
-        private void initViewsByID() {
-        city = findViewById(R.id.location);
-        temperature = findViewById(R.id.temperature);
-        pressure = findViewById(R.id.pressure_text);
-        windSpeed = findViewById(R.id.wind_text);
-        windIcon = findViewById(R.id.wind_icon);
-        pressureIcon = findViewById(R.id.pressure_icon);
-        mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
-        currentWeather = findViewById(R.id.current_weather);
-        currentDate = findViewById(R.id.current_date);
-        maxMinTemperature = findViewById(R.id.max_min_temperature);
-        sunriseSunset = findViewById(R.id.sunrise_sunset);
-        feelsLikeValue = findViewById(R.id.feels_like_value);
-
-
-    }
-
-    private void initRecyclerView() {
-        final RecyclerView recyclerView = findViewById(R.id.recycler_view_forecast);
-        recyclerView.setLayoutManager(new LinearLayoutManager(
-                this, RecyclerView.VERTICAL, false));
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerViewAdapter.setDays(Arrays.asList(days));
-        recyclerViewAdapter.setOnDayClickListener(new ForecastRecyclerViewAdapter.DaysViewHolder.OnDayClickListener() {
-            @Override
-            public void onClicked(String day) {
-                onDayClicked(day);
-            }
-        });
-
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(this,  LinearLayoutManager.VERTICAL);
-        itemDecoration.setDrawable(getDrawable(R.drawable.decorator));
-        recyclerView.addItemDecoration(itemDecoration);
-    }
-
-    private void onDayClicked(String day) {
-        Intent intent = new Intent(this, ExtendedActivity.class);
-        intent.putExtra("Date", day);
-        startActivity(intent);
-    }
-
-    private void setButtonsClickListeners() {
-
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-    }
-
-    private void setActualDates() {
-        long oneDay = 86400000;
-
-        currentDate.setText(getDate(date));
-
-        for (int i = 0; i <days.length ; i++) {
-            date.setTime(date.getTime() + oneDay);
-            days[i] = getDate(date);
-        }
-    }
-
-    private String getDate(Date d) {
-        StringBuilder sb = new StringBuilder();
-        String[] date = d.toString().split(" ", 4);
-        for (int i = 0; i < 3; i++) {
-            sb.append(date[i]).append(" ");
-        }
-        return sb.toString();
-    }
-
-    private String getHoursAndMinutes(Date d) {
-        StringBuilder sb = new StringBuilder();
-        String[] date = d.toString().split(" ", 4);
-        String[] hours = date[3].split(":", 3);
-        sb.append(hours[0] + ":" + hours[1]);
-        return sb.toString();
-    }
-
-    private void initNotificationChannel(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    private void initNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager =
-                    (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel mChannel = new NotificationChannel("2", "name", importance);
             notificationManager.createNotificationChannel(mChannel);
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
 
-        loadPreferences();
+    private void loadPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
 
-        requestRetrofit(city.getText().toString(), ID);
+        currentLocation = new Location(
+                sharedPreferences.getString(CITY, "Moscow"),
+                sharedPreferences.getFloat(LAT, 55),
+                sharedPreferences.getFloat(LON, 37));
     }
 
-    private void requestRetrofit(final String city, String keyApi) {
-        weatherRequest.loadWeather(city, keyApi)
-                .enqueue(new Callback<MainForecast>() {
-                    @Override
-                    public void onResponse(Call<MainForecast> call, Response<MainForecast> response) {
-                        if (response.body() != null) {
-                            mainForecast = response.body();
-                            displayWeather(mainForecast);
-                            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<MainForecast> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Fail", Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void savePreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SETTINGS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CITY, currentLocation.city);
+        editor.putFloat(LAT, currentLocation.lat);
+        editor.putFloat(LON, currentLocation.lon);
+        editor.apply();
     }
 
-
-    @Override
-    protected void onStop() {
-        super.onStop();
+    private void startExtendedActivity(String day) {
+        Intent intent = new Intent(this, ExtendedActivity.class);
+        intent.putExtra("Date", day);
+        startActivity(intent);
     }
 
-    private void updateForecast(){
-        requestRetrofit(city.getText().toString(), ID);
-        if (mainForecast == null){
-            showFailToUpdateSnackBar("Fail to update data");
+    private void updateWeather() {
+        weatherUpdater.executeUpdate(this, currentLocation);
+    }
+
+    private boolean checkFavorite() {
+        SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+        List<Location> list = searchHistoryDao.getAllLocations();
+        for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
+            if (list.get(i).city.equals(currentLocation.city)) {
+                return true;
+            }
         }
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void displayWeather(MainForecast mainForecast){
-        temperature.setText(String.format("%.0f%s", mainForecast.getMain().getTemp() - 273, tempUnits));
-        pressure.setText(String.format("%d %s", mainForecast.getMain().getPressure(), pressureUnits));
-        windSpeed.setText(String.format("%.1f %s", mainForecast.getWind().getSpeed(), windUnits));
-        currentWeather.setText(mainForecast.getWeather()[0].getMain());
-        feelsLikeValue.setText(String.format("%.0f %s", mainForecast.getMain().getFeels_like() - 273, tempUnits));
-        sunriseSunset.setText(String.format("%s/%s",
-                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunrise())),
-                getHoursAndMinutes(getDateByMs(mainForecast.getSys().getSunset()))));
-        maxMinTemperature.setText(String.format("%.0f%s/%.0f%s",
-                mainForecast.getMain().getTemp_min() - 273,
-                tempUnits,
-                mainForecast.getMain().getTemp_max() - 273,
-                tempUnits));
-
-//        mainWeatherIcon.setImageResource();
-//
-//        setMainWeatherIcon(mainForecast);
-
-    }
-
-//    private void  setMainWeatherIcon(MainForecast mainForecast){
-//        switch  {
-//            case "10n"||"10d" :
-//
-//        }
-//
-//        mainWeatherIcon.setImageResource();
-//    }
-
-    private Date getDateByMs(long ms){
-        date.setTime(ms);
-        return date;
-    }
-
-    private void showFailToUpdateSnackBar(String msg){
-        View view = findViewById(R.id.main_constraint);
-        Snackbar.make(view, msg, Snackbar.LENGTH_INDEFINITE)
-                .setAction("Retry", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        updateForecast();
-                    }
-                }).show();
-
+        return false;
     }
 
     @Override
@@ -333,9 +207,7 @@ public class MainActivity extends AppCompatActivity implements Constants {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
-
         switch (id) {
             case R.id.action_settings:
                 onSettingsClicked();
@@ -347,26 +219,24 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 onAddLocationClicked();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
 
     private void onSettingsClicked() {
-
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
-    private void onHistoryClicked(){
+    private void onHistoryClicked() {
         final String[] items;
-        List<Location>  locations = searchHistoryDao.getAllLocations();
+        List<Location> locations = searchHistoryDao.getAllLocations();
         if (locations.isEmpty()) {
-            items = new String[]{city.getText().toString()};
+            items = new String[]{getString(R.string.no_favorite)};
         } else {
             items = new String[(int) searchHistoryDao.getCountLocations()];
-            for (int i = 0; i <searchHistoryDao.getCountLocations() ; i++) {
-                items[i] = locations.get(i).location;
+            for (int i = 0; i < searchHistoryDao.getCountLocations(); i++) {
+                items[i] = locations.get(i).city;
             }
         }
 
@@ -375,21 +245,175 @@ public class MainActivity extends AppCompatActivity implements Constants {
                 .setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("City", items[i]);
-                        editor.apply();
-                        city.setText(items[i]);
-                        updateForecast();
-                        displayWeather(mainForecast);
+                        if (items[i].equals(getString(R.string.no_favorite))) {
+                            return;
+                        }
+                        currentLocation = locations.get(i);
+                        savePreferences();
+                        updateWeather();
                     }
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
 
-    private void onAddLocationClicked(){
+    private void onAddLocationClicked() {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
+    }
+
+    private class OnAddToFavoriteClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            SearchHistoryDao searchHistoryDao = App.getInstance().getLocationDao();
+            if (checkFavorite()) {
+                addToFavorite.setImageResource(R.drawable.ic_star_border);
+                searchHistoryDao.deleteLocation(currentLocation);
+            } else {
+                addToFavorite.setImageResource(R.drawable.ic_star);
+                searchHistoryDao.insertLocation(currentLocation);
+            }
+        }
+    }
+
+    private class OnDayClickListener implements ForecastRecyclerViewAdapter.DaysViewHolder.OnDayClickListener {
+        @Override
+        public void onClicked(String day) {
+            startExtendedActivity(day);
+        }
+    }
+
+
+    private class UiUpdater {
+        private Date date = new Date();
+        private String[] days = new String[7];
+
+        private TextView city;
+        private TextView temperature;
+        private TextView pressure;
+        private TextView windSpeed;
+        private ImageView mainWeatherIcon;
+        private TextView currentWeather;
+        private TextView currentDate;
+        private TextView currentHumidity;
+        private TextView currentCloudiness;
+        private TextView feelsLikeValue;
+
+        private ImageView hourlyIcon01;
+        private ImageView hourlyIcon02;
+        private ImageView hourlyIcon03;
+        private ImageView hourlyIcon04;
+
+        private TextView hourlyTemp01;
+        private TextView hourlyTemp02;
+        private TextView hourlyTemp03;
+        private TextView hourlyTemp04;
+
+        private TextView hourlyTime01;
+        private TextView hourlyTime02;
+        private TextView hourlyTime03;
+        private TextView hourlyTime04;
+
+        private void initUi(){
+            initViewsByID();
+            setActualDates();
+        }
+
+        private void updateUI(){
+            displayWeather();
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
+
+        private void initViewsByID() {
+
+            city = findViewById(R.id.location);
+            temperature = findViewById(R.id.temperature);
+            pressure = findViewById(R.id.pressure_text);
+            windSpeed = findViewById(R.id.wind_text);
+            mainWeatherIcon = (ImageView) findViewById(R.id.main_weather_icon);
+            currentWeather = findViewById(R.id.current_weather);
+            currentDate = findViewById(R.id.current_date);
+            currentHumidity = findViewById(R.id.current_humidity);
+            currentCloudiness = findViewById(R.id.current_cloudniess);
+            feelsLikeValue = findViewById(R.id.feels_like_value);
+
+            hourlyIcon01 = findViewById(R.id.weather_icon_00);
+            hourlyIcon02 = findViewById(R.id.weather_icon_06);
+            hourlyIcon03 = findViewById(R.id.weather_icon_12);
+            hourlyIcon04 = findViewById(R.id.weather_icon_18);
+
+            hourlyTemp01 = findViewById(R.id.hourly_temp_00);
+            hourlyTemp02 = findViewById(R.id.hourly_temp_06);
+            hourlyTemp03 = findViewById(R.id.hourly_temp_12);
+            hourlyTemp04 = findViewById(R.id.hourly_temp_18);
+
+            hourlyTime01 = findViewById(R.id.time_text_00);
+            hourlyTime02 = findViewById(R.id.time_text_06);
+            hourlyTime03 = findViewById(R.id.time_text_12);
+            hourlyTime04 = findViewById(R.id.time_text_18);
+        }
+
+        private void displayWeather() {
+            WeatherParser weatherParser = weatherUpdater.getWeatherParser();
+            displayCurrentLocation();
+            temperature.setText(weatherParser.getCurrentTemperature());
+            pressure.setText(weatherParser.getCurrentPressure());
+            windSpeed.setText(weatherParser.getCurrentWindSpeed());
+            currentWeather.setText(weatherParser.getCurrentWeather());
+            feelsLikeValue.setText(weatherParser.getCurrentFeelsLike());
+            currentCloudiness.setText(weatherParser.getCurrentCloudiness());
+            currentHumidity.setText(weatherParser.getCurrentHumidity());
+            mainWeatherIcon.setImageResource(weatherParser.getMainWeatherIcon());
+
+            hourlyIcon01.setImageResource(weatherParser.getHourlyWeatherIcon(3));
+            hourlyIcon02.setImageResource(weatherParser.getHourlyWeatherIcon(6));
+            hourlyIcon03.setImageResource(weatherParser.getHourlyWeatherIcon(12));
+            hourlyIcon04.setImageResource(weatherParser.getHourlyWeatherIcon(18));
+
+            hourlyTemp01.setText(weatherParser.getHourlyTemp(3));
+            hourlyTemp02.setText(weatherParser.getHourlyTemp(6));
+            hourlyTemp03.setText(weatherParser.getHourlyTemp(12));
+            hourlyTemp04.setText(weatherParser.getHourlyTemp(18));
+
+            hourlyTime01.setText(weatherParser.getTime(3));
+            hourlyTime02.setText(weatherParser.getTime(6));
+            hourlyTime03.setText(weatherParser.getTime(12));
+            hourlyTime04.setText(weatherParser.getTime(18));
+        }
+
+        private void displayCurrentLocation() {
+            city.setText(currentLocation.city);
+            displayFavorite();
+        }
+
+        private void displayFavorite() {
+            if (checkFavorite()) {
+                addToFavorite.setImageResource(R.drawable.ic_star);
+            } else {
+                addToFavorite.setImageResource(R.drawable.ic_star_border);
+            }
+        }
+
+        private void setActualDates() {
+            long oneDay = 86400000;
+            currentDate.setText(getDate(date));
+            for (int i = 0; i < days.length; i++) {
+                days[i] = getDate(date);
+                date.setTime(date.getTime() + oneDay);
+            }
+        }
+
+        private String getDate(Date d) {
+            StringBuilder sb = new StringBuilder();
+            String[] date = d.toString().split(" ", 4);
+            for (int i = 0; i < 3; i++) {
+                sb.append(date[i]).append(" ");
+            }
+            return sb.toString();
+        }
+
+        public String[] getActualDates() {
+            return days;
+        }
     }
 }

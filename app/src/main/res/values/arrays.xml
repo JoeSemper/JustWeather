@@ -25,4 +25,10 @@
         <item>m/ph</item>
     </string-array>
 
+    <string-array name="choose_unit_system">
+        <item>Standard</item>
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
+
 </resources>
