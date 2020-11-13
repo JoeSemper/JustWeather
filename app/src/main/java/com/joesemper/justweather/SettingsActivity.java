@@ -23,6 +23,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
     private com.google.android.gms.common.SignInButton buttonSignIn;
     private MaterialButton buttonSingOut;
     private TextView email;
-    private Switch autoLocationSwitch;
+    private SwitchMaterial autoLocationSwitch;
 
     private String currentUnits;
 
@@ -60,20 +61,15 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         initViewsById();
-
         initToolbar();
-
         loadPreferences();
-
         initSignIn();
-
         setOnButtonsClickListeners();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         checkSignIn();
     }
 

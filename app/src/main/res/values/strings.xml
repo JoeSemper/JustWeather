@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Just Weather</string>
     <string name="strings">Moscow</string>
-    <string name="temp">10°C</string>
+    <string name="temp">-°C</string>
     <string name="textview">Sunny</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
@@ -29,7 +29,7 @@
     <string name="apply_text">Apply</string>
     <string name="day_2">July 2</string>
     <string name="temp_2">+11  °C</string>
-    <string name="hint">Locatoin</string>
+    <string name="hint">Location</string>
     <string name="setLocationButton">Set</string>
     <string name="feels_like">Feels like:</string>
 
