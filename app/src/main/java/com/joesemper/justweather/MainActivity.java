@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonsClickListeners() {
         addToFavorite.setOnClickListener(new OnAddToFavoriteClickListener());
-        recyclerViewAdapter.setOnDayClickListener(new OnDayClickListener());
     }
 
     private void initBroadcastReceiver() {
@@ -176,12 +175,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putFloat(LAT, currentLocation.lat);
         editor.putFloat(LON, currentLocation.lon);
         editor.apply();
-    }
-
-    private void startExtendedActivity(String day) {
-        Intent intent = new Intent(this, ExtendedActivity.class);
-        intent.putExtra("Date", day);
-        startActivity(intent);
     }
 
     private void updateWeather() {
@@ -276,14 +269,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class OnDayClickListener implements ForecastRecyclerViewAdapter.DaysViewHolder.OnDayClickListener {
-        @Override
-        public void onClicked(String day) {
-            startExtendedActivity(day);
-        }
-    }
-
-
     private class UiUpdater {
         private Date date = new Date();
         private String[] days = new String[7];
@@ -314,12 +299,12 @@ public class MainActivity extends AppCompatActivity {
         private TextView hourlyTime03;
         private TextView hourlyTime04;
 
-        private void initUi(){
+        private void initUi() {
             initViewsByID();
             setActualDates();
         }
 
-        private void updateUI(){
+        private void updateUI() {
             displayWeather();
             recyclerViewAdapter.notifyDataSetChanged();
         }

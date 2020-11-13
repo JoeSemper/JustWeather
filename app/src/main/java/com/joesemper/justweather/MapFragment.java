@@ -33,6 +33,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.button.MaterialButton;
 import com.joesemper.justweather.database.Location;
 import com.joesemper.justweather.services.SearchWorker;
 
@@ -47,12 +48,7 @@ import static com.joesemper.justweather.SettingsActivity.CITY;
 import static com.joesemper.justweather.SettingsActivity.LAT;
 import static com.joesemper.justweather.SettingsActivity.LON;
 import static com.joesemper.justweather.SettingsActivity.SETTINGS;
-import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_FINISHED;
-import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT;
-import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT_OK;
 import static com.joesemper.justweather.services.SearchWorker.SEARCH_PARCEL;
-import static com.joesemper.justweather.services.SearchWorker.SEARCH_RESULT_LAT;
-import static com.joesemper.justweather.services.SearchWorker.SEARCH_RESULT_LON;
 import static com.joesemper.justweather.services.SearchWorker.WORK_MANAGER;
 
 public class MapFragment extends Fragment {
@@ -62,8 +58,6 @@ public class MapFragment extends Fragment {
     private Location currentCity;
     private MapView mapView;
     private Boolean isAutoLocationAllowed;
-
-    private Marker currentMarker;
 
     private static final int PERMISSION_REQUEST_CODE = 10;
 
@@ -87,7 +81,6 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         initViews(view);
         initMap(savedInstanceState);
-//        initSearchOnMap();
         return view;
     }
 
@@ -122,19 +115,13 @@ public class MapFragment extends Fragment {
                 getAddress(currentPosition);
                 addMarker(currentPosition);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 10));
-
-//                currentPosition = new LatLng(intent.getDoubleExtra(SEARCH_RESULT_LAT, 56),
-//                        intent.getDoubleExtra(SEARCH_RESULT_LON, 56));
-//
-//                getAddress(currentPosition);
-//                addMarker(currentPosition);
-//                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 10));
             }
         };
     }
 
     private void loadPreferences() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(SETTINGS, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = Objects.requireNonNull(getActivity())
+                .getSharedPreferences(SETTINGS, MODE_PRIVATE);
         currentCity = new Location(
                 sharedPreferences.getString(CITY, "Moscow"),
                 sharedPreferences.getFloat(LAT, 55),
@@ -144,7 +131,8 @@ public class MapFragment extends Fragment {
     }
 
     private void savePreferences() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(SETTINGS, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = Objects.requireNonNull(getActivity())
+                .getSharedPreferences(SETTINGS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(CITY, address.getText().toString());
         editor.putFloat(LAT, (float) currentPosition.latitude);
@@ -153,8 +141,11 @@ public class MapFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        mapView = (MapView) view.findViewById(R.id.mapView);
-        address = (TextView) view.findViewById(R.id.current_location);
+        MaterialButton materialButton = view.findViewById(R.id.button_apply);
+        materialButton.setOnClickListener(new OnApplyClickListener());
+
+        mapView = view.findViewById(R.id.mapView);
+        address = view.findViewById(R.id.current_location);
         address.setText(currentCity.city);
     }
 
@@ -162,7 +153,8 @@ public class MapFragment extends Fragment {
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
+            MapsInitializer.initialize(Objects.requireNonNull(getActivity())
+                    .getApplicationContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,8 +176,10 @@ public class MapFragment extends Fragment {
     }
 
     private void requestPermissions() {
-        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         } else {
             requestLocationPermissions();
@@ -196,7 +190,8 @@ public class MapFragment extends Fragment {
         if (!isAutoLocationAllowed) {
             return;
         }
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(Objects.requireNonNull(getActivity()), Manifest.permission.CALL_PHONE)) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(Objects.requireNonNull(getActivity()),
+                Manifest.permission.CALL_PHONE)) {
             ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()),
                     new String[]{
                             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -210,9 +205,12 @@ public class MapFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length == 2 &&
-                    (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    (grantResults[0] == PackageManager.PERMISSION_GRANTED ||
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+                if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(getActivity(),
+                                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
                 mMap.setMyLocationEnabled(true);
@@ -227,69 +225,6 @@ public class MapFragment extends Fragment {
             addMarker(latLng);
         }
     }
-
-//    private void onSearch() {
-//        final Geocoder geocoder = new Geocoder(getActivity());
-//        final SearchView searchView = Objects.requireNonNull(getActivity()).findViewById(R.id.search);
-//        final String searchText = searchView.getQuery().toString();
-//
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
-//                    if (addresses.size() > 0) {
-//                        final LatLng location = new LatLng(addresses.get(0).getLatitude(),
-//                                addresses.get(0).getLongitude());
-//                        currentPosition = location;
-//                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mMap.clear();
-//                                addMarker(currentPosition);
-//                                getAddress(currentPosition);
-//                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
-//                            }
-//                        });
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
-//    }
-//            @Override
-//            public void onClick(View v) {
-//                final Geocoder geocoder = new Geocoder(getActivity());
-//                final String searchText = searchView.getQuery().toString();
-//
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
-//                            if (addresses.size() > 0) {
-//                                final LatLng location = new LatLng(addresses.get(0).getLatitude(),
-//                                        addresses.get(0).getLongitude());
-//                                currentPosition = location;
-//                                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        mMap.clear();
-//                                        addMarker(currentPosition);
-//                                        getAddress(currentPosition);
-//                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
-//                                    }
-//                                });
-//                            }
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }).start();
-//            }
-//        });
-//    }
 
     private void getAddress(final LatLng location) {
         final Geocoder geocoder = new Geocoder(getContext());
@@ -312,11 +247,11 @@ public class MapFragment extends Fragment {
             public void run() {
                 if (addresses.get(0).getLocality() != null) {
                     address.setText(addresses.get(0).getLocality());
+                } else if (addresses.get(0).getSubAdminArea() != null) {
+                    address.setText(addresses.get(0).getSubAdminArea());
                 } else {
-                    address.setText(R.string.no_locality);
-                    return;
+                    address.setText(addresses.get(0).getAdminArea());
                 }
-                savePreferences();
             }
         });
     }
@@ -328,6 +263,14 @@ public class MapFragment extends Fragment {
                 .position(location)
                 .title(currentCity.city)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+    }
+
+    private class OnApplyClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            savePreferences();
+            Objects.requireNonNull(getActivity()).finish();
+        }
     }
 
     @Override

@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:text="-- °C"
                 app:layout_constraintBottom_toBottomOf="@+id/evening"
-                app:layout_constraintStart_toStartOf="@+id/day_daytime_temp"
+                app:layout_constraintEnd_toEndOf="@+id/day_daytime_temp"
                 app:layout_constraintTop_toTopOf="@+id/evening" />
 
             <TextView
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:text="-- °C"
                 app:layout_constraintBottom_toBottomOf="@+id/night"
-                app:layout_constraintStart_toStartOf="@+id/day_evening_temp"
+                app:layout_constraintEnd_toEndOf="@+id/day_evening_temp"
                 app:layout_constraintTop_toTopOf="@+id/night" />
 
             <TextView
@@ -120,7 +120,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:background="?android:attr/listDivider"
+                android:background="@color/common_google_signin_btn_text_dark_disabled"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/date_text" />
@@ -153,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:text="-- °C"
                 app:layout_constraintBottom_toBottomOf="@+id/day"
-                app:layout_constraintStart_toStartOf="@+id/day_morning_temp"
+                app:layout_constraintEnd_toEndOf="@+id/day_morning_temp"
                 app:layout_constraintTop_toTopOf="@+id/day" />
 
             <ImageView
