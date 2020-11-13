@@ -69,6 +69,8 @@ public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
 
+    private SearchView searchView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +81,7 @@ public class MapsActivity extends AppCompatActivity {
 
         initToolbar();
 
-        initFragment(new SearchListFragment());
+        initFragment(new MapFragment());
     }
 
     private void initToolbar() {
@@ -95,11 +97,10 @@ public class MapsActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.search_menu, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                Toast.makeText(MapsActivity.this, searchView.getQuery().toString(), Toast.LENGTH_SHORT).show();
                 Data input = new Data.Builder().putString(CITY, query).build();
                 OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest
                         .Builder(SearchWorker.class)
@@ -153,13 +154,13 @@ public class MapsActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(menu.getItem(1).isVisible()){
-            menu.getItem(1).setVisible(false);
-            menu.getItem(2).setVisible(true);
-        } else {
-            menu.getItem(1).setVisible(true);
-            menu.getItem(2).setVisible(false);
-        }
+//        if(menu.getItem(1).isVisible()){
+//            menu.getItem(1).setVisible(false);
+//            menu.getItem(2).setVisible(true);
+//        } else {
+//            menu.getItem(1).setVisible(true);
+//            menu.getItem(2).setVisible(false);
+//        }
         return super.onPrepareOptionsMenu(menu);
     }
 

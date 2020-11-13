@@ -20,5 +20,6 @@
         android:icon="@drawable/ic_baseline_format_list_bulleted_24"
         android:orderInCategory="10"
         android:title="@string/list_view"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 </menu>

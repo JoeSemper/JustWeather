@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.joesemper.justweather.database.Location;
+import com.joesemper.justweather.services.SearchWorker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import static com.joesemper.justweather.SettingsActivity.SETTINGS;
 import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_FINISHED;
 import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT;
 import static com.joesemper.justweather.retrofit.RetrofitUpdater.UPDATE_RESULT_OK;
+import static com.joesemper.justweather.services.SearchWorker.SEARCH_PARCEL;
 import static com.joesemper.justweather.services.SearchWorker.SEARCH_RESULT_LAT;
 import static com.joesemper.justweather.services.SearchWorker.SEARCH_RESULT_LON;
 import static com.joesemper.justweather.services.SearchWorker.WORK_MANAGER;
@@ -95,18 +97,38 @@ public class MapFragment extends Fragment {
         regReceiver();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        unRegReceiver();
+    }
+
     private void regReceiver() {
         Objects.requireNonNull(getActivity()).registerReceiver(broadcastReceiver, new IntentFilter(WORK_MANAGER));
+    }
+
+    private void unRegReceiver() {
+        Objects.requireNonNull(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     private void initBroadcastReceiver() {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                currentPosition = new LatLng(intent.getIntExtra(SEARCH_RESULT_LAT, 56),
-                        intent.getIntExtra(SEARCH_RESULT_LON, 56));
+
+                SearchWorker.AddressParcel parcel = intent.getParcelableExtra(SEARCH_PARCEL);
+                List<Address> addresses = Objects.requireNonNull(parcel).getAddresses();
+                currentPosition = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
                 getAddress(currentPosition);
                 addMarker(currentPosition);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 10));
+
+//                currentPosition = new LatLng(intent.getDoubleExtra(SEARCH_RESULT_LAT, 56),
+//                        intent.getDoubleExtra(SEARCH_RESULT_LON, 56));
+//
+//                getAddress(currentPosition);
+//                addMarker(currentPosition);
+//                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 10));
             }
         };
     }
@@ -155,8 +177,6 @@ public class MapFragment extends Fragment {
             if (isAutoLocationAllowed) {
                 requestPermissions();
             }
-//            mMap.setMyLocationEnabled(true);
-//            requestLocationPermissions();
             addMarker(currentPosition);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) 10));
             mMap.setOnMapLongClickListener(new MyOnMapLongClickListener());
@@ -208,54 +228,36 @@ public class MapFragment extends Fragment {
         }
     }
 
-//    private void initSearchOnMap(){
+//    private void onSearch() {
+//        final Geocoder geocoder = new Geocoder(getActivity());
+//        final SearchView searchView = Objects.requireNonNull(getActivity()).findViewById(R.id.search);
+//        final String searchText = searchView.getQuery().toString();
 //
-////        SearchView searchView =
-////                (SearchView) menu.findItem(R.id.search).getActionView();
-//        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+//        new Thread(new Runnable() {
 //            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                onSearch();
+//            public void run() {
+//                try {
+//                    List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
+//                    if (addresses.size() > 0) {
+//                        final LatLng location = new LatLng(addresses.get(0).getLatitude(),
+//                                addresses.get(0).getLongitude());
+//                        currentPosition = location;
+//                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                mMap.clear();
+//                                addMarker(currentPosition);
+//                                getAddress(currentPosition);
+//                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
+//                            }
+//                        });
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 //            }
-//        });
-//        searchView.setOnSearchClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getActivity(), searchView.getQuery().toString(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
+//        }).start();
 //    }
-
-    private void onSearch() {
-        final Geocoder geocoder = new Geocoder(getActivity());
-        final SearchView searchView = Objects.requireNonNull(getActivity()).findViewById(R.id.search);
-        final String searchText = searchView.getQuery().toString();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<Address> addresses = geocoder.getFromLocationName(searchText, 1);
-                    if (addresses.size() > 0) {
-                        final LatLng location = new LatLng(addresses.get(0).getLatitude(),
-                                addresses.get(0).getLongitude());
-                        currentPosition = location;
-                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mMap.clear();
-                                addMarker(currentPosition);
-                                getAddress(currentPosition);
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) 15));
-                            }
-                        });
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 //            @Override
 //            public void onClick(View v) {
 //                final Geocoder geocoder = new Geocoder(getActivity());
